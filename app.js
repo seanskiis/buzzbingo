@@ -13,6 +13,8 @@ const carouselPrev = document.querySelector("#carouselPrev");
 const carouselNext = document.querySelector("#carouselNext");
 
 const config = window.BUZZBINGO_FIREBASE_CONFIG;
+const ACTIVE_DATE_TODAY = "TODAY";
+const ACTIVE_DATE_TIME_ZONE = "America/Chicago";
 const INTRO_CARD_KEY = "__buzzbingo_intro__";
 const emblaOptions = {
   align: "center",
@@ -23,6 +25,7 @@ const emblaOptions = {
 };
 
 let activeDate = null;
+let activeDateSetting = null;
 let database = null;
 let dailyBuzzwordRecords = {};
 let dayKeys = [INTRO_CARD_KEY];
@@ -52,6 +55,30 @@ function formatDate(dateKey) {
   }).format(new Date(year, month - 1, day));
 }
 
+function getDateKeyInTimeZone(date = new Date()) {
+  const dateParts = new Intl.DateTimeFormat("en-US", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: ACTIVE_DATE_TIME_ZONE,
+    year: "numeric",
+  }).formatToParts(date);
+  const partMap = Object.fromEntries(dateParts.map((part) => [part.type, part.value]));
+
+  return `${partMap.year}-${partMap.month}-${partMap.day}`;
+}
+
+function resolveActiveDate(value) {
+  if (String(value || "").trim().toUpperCase() === ACTIVE_DATE_TODAY) {
+    return getDateKeyInTimeZone();
+  }
+
+  return value;
+}
+
+function isTodaySetting(value) {
+  return String(value || "").trim().toUpperCase() === ACTIVE_DATE_TODAY;
+}
+
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (character) => {
     return {
@@ -76,6 +103,10 @@ function hasFirebaseConfig(firebaseConfig) {
 
 function isIntroCard(dateKey) {
   return dateKey === INTRO_CARD_KEY;
+}
+
+function isDateKey(dateKey) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(dateKey));
 }
 
 function getDayRecord(dateKey) {
@@ -231,7 +262,9 @@ function renderSlide(dateKey) {
 }
 
 function buildDayKeys(records) {
-  const keys = Object.keys(records || {}).sort((leftDate, rightDate) => rightDate.localeCompare(leftDate));
+  const keys = Object.keys(records || {})
+    .filter((dateKey) => isDateKey(dateKey) && (!activeDate || dateKey <= activeDate))
+    .sort((leftDate, rightDate) => rightDate.localeCompare(leftDate));
 
   if (activeDate && !keys.includes(activeDate)) {
     keys.unshift(activeDate);
@@ -334,7 +367,8 @@ if (!hasFirebaseConfig(config)) {
     unsubscribeActiveDate = onValue(
       ref(database, "settings/activeDate"),
       (snapshot) => {
-        const nextActiveDate = snapshot.val();
+        activeDateSetting = snapshot.val();
+        const nextActiveDate = resolveActiveDate(activeDateSetting);
 
         if (!nextActiveDate) {
           activeDate = null;
@@ -406,6 +440,20 @@ window.addEventListener("beforeunload", () => {
     emblaApi.destroy();
   }
 });
+
+window.setInterval(() => {
+  if (!isTodaySetting(activeDateSetting)) {
+    return;
+  }
+
+  const nextActiveDate = resolveActiveDate(activeDateSetting);
+
+  if (nextActiveDate && nextActiveDate !== activeDate) {
+    activeDate = nextActiveDate;
+    userSelectedCard = false;
+    renderCards(dailyBuzzwordRecords);
+  }
+}, 60 * 1000);
 
 carouselPrev.addEventListener("click", () => {
   if (emblaApi) {

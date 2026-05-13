@@ -17,7 +17,7 @@ GitHub Pages can host the page, but it cannot store a shared count by itself. Th
 ```json
 {
   "settings": {
-    "activeDate": "2026-05-13"
+    "activeDate": "TODAY"
   },
   "dailyBuzzwords": {
     "2026-05-13": {
@@ -28,6 +28,8 @@ GitHub Pages can host the page, but it cannot store a shared count by itself. Th
   }
 }
 ```
+
+When `settings/activeDate` is `TODAY`, BuzzBingo resolves it in the browser using the `America/Chicago` timezone and loads the matching `dailyBuzzwords/YYYY-MM-DD` record. Future dated records can be added ahead of time; they stay hidden until their date becomes active. Open browser tabs check once per minute and roll forward after the Central Time date changes.
 
 6. In Realtime Database rules, use this for a casual public counter:
 
@@ -42,7 +44,7 @@ GitHub Pages can host the page, but it cannot store a shared count by itself. Th
       ".read": true,
       "$date": {
         "count": {
-          ".write": "root.child('settings/activeDate').val() == $date && newData.isNumber() && ((!data.exists() && newData.val() == 1) || (data.isNumber() && newData.val() == data.val() + 1))"
+          ".write": "(root.child('settings/activeDate').val() == $date || root.child('settings/activeDate').val() == 'TODAY') && newData.isNumber() && ((!data.exists() && newData.val() == 1) || (data.isNumber() && newData.val() == data.val() + 1))"
         },
         "$other": {
           ".write": false
@@ -55,6 +57,8 @@ GitHub Pages can host the page, but it cannot store a shared count by itself. Th
 
 These rules are intentionally simple for a friend-shared novelty counter. For a more public launch, add Firebase App Check or another abuse-prevention layer.
 
+When `activeDate` is set to `TODAY`, Realtime Database rules cannot independently calculate the current calendar date. The app only shows the button for today's resolved date, but a determined caller could still increment another dated count directly. That is acceptable for this casual version; use a scheduled server-side update instead if stronger enforcement becomes important.
+
 ## Database shape
 
 The current page reads the active date from:
@@ -62,6 +66,8 @@ The current page reads the active date from:
 ```text
 settings/activeDate
 ```
+
+Set it to either a concrete date like `2026-05-14` or the special value `TODAY`.
 
 It then reads and writes the matching daily buzzword:
 
@@ -75,7 +81,7 @@ Example:
 ```json
 {
   "settings": {
-    "activeDate": "2026-05-14"
+    "activeDate": "TODAY"
   },
   "dailyBuzzwords": {
     "2026-05-13": {
@@ -87,12 +93,17 @@ Example:
       "phraseId": "circleBack",
       "label": "Circle Back",
       "count": 0
+    },
+    "2026-05-15": {
+      "phraseId": "lowHangingFruit",
+      "label": "Low-Hanging Fruit",
+      "count": 0
     }
   }
 }
 ```
 
-Previous dates remain in `dailyBuzzwords`, so the app can show archived totals.
+Previous dates remain in `dailyBuzzwords`, so the app can show archived totals. Future dates can also remain in `dailyBuzzwords`; the app hides them until they are today or earlier.
 
 ## Daily admin workflow
 
@@ -104,7 +115,7 @@ For now, change the daily buzzword directly in Firebase:
 2. Go to Realtime Database > Data.
 3. Add a record under `dailyBuzzwords/YYYY-MM-DD`.
 4. Set `phraseId`, `label`, and `count`.
-5. Update `settings/activeDate` to the same date.
+5. Keep `settings/activeDate` set to `TODAY`, or update it to a concrete date when you want to override the schedule.
 
 Example:
 
@@ -122,7 +133,7 @@ Then:
 
 ```json
 "settings": {
-  "activeDate": "2026-05-14"
+  "activeDate": "TODAY"
 }
 ```
 
@@ -141,6 +152,13 @@ BuzzBingo uses semantic versioning in `version.js`. Asset URLs in `index.html` a
 Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
 
 ## Release notes
+
+### v1.8.0
+
+- Added app-side `TODAY` support for `settings/activeDate`.
+- Future dated buzzword records can now be preloaded without appearing early.
+- Added third-party notices for Embla Carousel.
+- Updated Firebase setup notes for scheduled daily buzzword records.
 
 ### v1.7.2
 
@@ -245,6 +263,10 @@ After replacing icon files, bump the version query strings in `index.html` so br
 ## Header logo
 
 The header uses `buzzbingo-header-logo.png`.
+
+## Third-party software
+
+BuzzBingo uses Embla Carousel for swipeable card navigation. See `THIRD_PARTY_NOTICES.md` for license details.
 
 ## Publish on GitHub Pages
 
