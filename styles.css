@@ -27,16 +27,34 @@ body {
     linear-gradient(135deg, #f7f3ec 0%, #e7eef0 52%, #f4d9cb 100%);
 }
 
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 100%;
+  padding: 24px clamp(22px, 4vw, 44px);
+}
+
+.app-logo {
+  color: var(--ink);
+  font-size: clamp(1.25rem, 2.6vw, 1.65rem);
+  font-weight: 800;
+  letter-spacing: 0;
+  text-decoration: none;
+}
+
 .counter-shell {
   display: grid;
   min-height: 100vh;
   place-items: center;
-  padding: 24px;
+  padding: 112px 24px 42px;
 }
 
 .counter-panel {
-  width: min(100%, 560px);
-  padding: clamp(28px, 6vw, 56px);
+  width: min(100%, 520px);
+  min-height: min(680px, calc(100vh - 154px));
+  padding: clamp(44px, 7vw, 72px) clamp(28px, 5.5vw, 58px);
   border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.86);
@@ -75,29 +93,39 @@ body {
   background: var(--accent);
 }
 
+.phrase-kicker {
+  margin: 34px 0 10px;
+  color: var(--muted);
+  font-size: clamp(0.84rem, 2.4vw, 0.98rem);
+  font-weight: 700;
+}
+
 h1 {
-  margin: 28px 0 10px;
-  font-size: clamp(3rem, 12vw, 6.75rem);
-  line-height: 0.9;
+  max-width: 9.5em;
+  margin: 0 auto 14px;
+  overflow-wrap: anywhere;
+  font-size: clamp(2.9rem, 14vw, 4.6rem);
+  line-height: 1.08;
   letter-spacing: 0;
 }
 
 .subtitle {
-  max-width: 32rem;
-  margin: 0 auto 34px;
+  max-width: 20rem;
+  margin: 0 auto 28px;
   color: var(--muted);
-  font-size: clamp(1rem, 2.5vw, 1.18rem);
-  line-height: 1.55;
+  font-size: clamp(0.92rem, 2.5vw, 1.02rem);
+  font-weight: 650;
+  line-height: 1.35;
 }
 
 .tally-wrap {
   display: grid;
-  gap: 4px;
-  margin: 0 auto 30px;
+  gap: 12px;
+  margin: 0 auto 24px;
 }
 
 .tally-label {
-  color: var(--muted);
+  color: var(--ink);
   font-size: 0.92rem;
   font-weight: 800;
   letter-spacing: 0;
@@ -106,7 +134,7 @@ h1 {
 
 .tally {
   font-variant-numeric: tabular-nums;
-  font-size: clamp(5.25rem, 24vw, 10rem);
+  font-size: clamp(4rem, 18vw, 6.25rem);
   line-height: 0.9;
 }
 
@@ -115,8 +143,8 @@ h1 {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  width: min(100%, 360px);
-  min-height: 72px;
+  width: min(100%, 320px);
+  min-height: 58px;
   border: 0;
   border-radius: 8px;
   color: #fff;
@@ -124,7 +152,7 @@ h1 {
   box-shadow: 0 12px 28px rgba(164, 50, 28, 0.28);
   cursor: pointer;
   font: inherit;
-  font-size: 1.18rem;
+  font-size: 0.98rem;
   font-weight: 900;
   transition:
     transform 120ms ease,
@@ -162,17 +190,28 @@ h1 {
   min-height: 1.5rem;
   margin: 22px auto 0;
   color: var(--muted);
-  font-size: 0.96rem;
+  font-size: 0.94rem;
   line-height: 1.5;
 }
 
 @media (max-width: 520px) {
+  .app-header {
+    position: static;
+    padding: 20px 20px 0;
+  }
+
   .counter-shell {
-    padding: 14px;
+    min-height: calc(100vh - 58px);
+    padding: 28px 14px 22px;
   }
 
   .counter-panel {
-    padding: 28px 20px;
+    min-height: auto;
+    padding: 36px 20px;
+  }
+
+  h1 {
+    font-size: clamp(2.65rem, 15vw, 4rem);
   }
 
   .count-button {

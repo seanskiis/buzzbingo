@@ -11,6 +11,10 @@
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
+    <header class="app-header" aria-label="BuzzBingo">
+      <a class="app-logo" href="./">BuzzBingo</a>
+    </header>
+
     <main class="counter-shell">
       <section class="counter-panel" aria-labelledby="pageTitle">
         <div class="label-row">
@@ -18,20 +22,20 @@
           <span id="connectionStatus">Connecting</span>
         </div>
 
-        <h1 id="pageTitle">BuzzBingo</h1>
+        <p class="phrase-kicker">Today's buzzword is</p>
+        <h1 id="pageTitle"><span id="phraseLabel">Force Multiplier</span></h1>
         <p class="subtitle">
-          Today's square: <strong>"<span id="phraseLabel">Force Multiplier</span>"</strong>.
-          Tap every time the phrase enters the room.
+          Click the button whenever the buzzword enters the room.
         </p>
 
         <div class="tally-wrap" aria-live="polite">
-          <span class="tally-label">Total heard</span>
+          <span class="tally-label">Total</span>
           <strong id="countDisplay" class="tally">-</strong>
         </div>
 
         <button id="countButton" class="count-button" type="button" disabled>
           <span class="button-icon" aria-hidden="true">+</span>
-          <span>I heard it</span>
+          <span>I HEARD IT!</span>
         </button>
 
         <p id="helperText" class="helper-text">
