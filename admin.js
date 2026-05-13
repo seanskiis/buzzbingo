@@ -33,6 +33,9 @@ const saveStatus = document.querySelector("#saveStatus");
 const scheduleSection = document.querySelector("#scheduleSection");
 const scheduleSummary = document.querySelector("#scheduleSummary");
 const scheduleList = document.querySelector("#scheduleList");
+const overwriteModal = document.querySelector("#overwriteModal");
+const confirmOverwriteButton = document.querySelector("#confirmOverwriteButton");
+const cancelOverwriteButton = document.querySelector("#cancelOverwriteButton");
 
 const config = window.BUZZBINGO_FIREBASE_CONFIG;
 
@@ -40,7 +43,10 @@ let auth = null;
 let database = null;
 let currentUser = null;
 let dailyBuzzwords = {};
+let editingDateKey = null;
 let isAdmin = false;
+let overwriteResolver = null;
+let previouslyFocusedElement = null;
 let unsubscribeSchedule = null;
 
 appVersion.textContent = window.BUZZBINGO_VERSION || "dev";
@@ -119,6 +125,7 @@ function resetForm() {
   buzzwordDate.value = getDateKeyInTimeZone();
   buzzwordLabel.value = "";
   bingoEligible.checked = true;
+  editingDateKey = null;
   saveButton.querySelector("span:last-child").textContent = "Save buzzword";
   cancelEditButton.hidden = true;
 }
@@ -254,10 +261,38 @@ function loadFutureBuzzwordForEdit(dateKey) {
   buzzwordDate.value = dateKey;
   buzzwordLabel.value = record.label || "";
   bingoEligible.checked = record.bingo !== false;
+  editingDateKey = dateKey;
   saveButton.querySelector("span:last-child").textContent = "Update buzzword";
   cancelEditButton.hidden = false;
   setSaveStatus(`Editing ${dateKey}.`);
   buzzwordLabel.focus();
+}
+
+function closeOverwriteModal(shouldOverwrite) {
+  overwriteModal.hidden = true;
+
+  if (previouslyFocusedElement && typeof previouslyFocusedElement.focus === "function") {
+    previouslyFocusedElement.focus();
+  }
+
+  if (overwriteResolver) {
+    overwriteResolver(shouldOverwrite);
+    overwriteResolver = null;
+  }
+}
+
+function confirmOverwrite() {
+  if (overwriteResolver) {
+    return Promise.resolve(false);
+  }
+
+  previouslyFocusedElement = document.activeElement;
+  overwriteModal.hidden = false;
+  confirmOverwriteButton.focus();
+
+  return new Promise((resolve) => {
+    overwriteResolver = resolve;
+  });
 }
 
 async function saveBuzzword(event) {
@@ -280,6 +315,18 @@ async function saveBuzzword(event) {
   if (!label || !id) {
     setSaveStatus("Add a buzzword.", true);
     return;
+  }
+
+  const existingRecord = dailyBuzzwords[dateKey];
+
+  if (existingRecord && dateKey !== editingDateKey) {
+    setSaveStatus("");
+    const shouldOverwrite = await confirmOverwrite();
+
+    if (!shouldOverwrite) {
+      setSaveStatus("Save canceled.");
+      return;
+    }
   }
 
   saveButton.disabled = true;
@@ -341,6 +388,21 @@ cancelEditButton.addEventListener("click", () => {
   resetForm();
   setSaveStatus("Edit canceled.");
   buzzwordLabel.focus();
+});
+
+confirmOverwriteButton.addEventListener("click", () => closeOverwriteModal(true));
+cancelOverwriteButton.addEventListener("click", () => closeOverwriteModal(false));
+
+overwriteModal.addEventListener("click", (event) => {
+  if (event.target === overwriteModal) {
+    closeOverwriteModal(false);
+  }
+});
+
+window.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !overwriteModal.hidden) {
+    closeOverwriteModal(false);
+  }
 });
 
 buzzwordForm.addEventListener("submit", saveBuzzword);

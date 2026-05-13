@@ -197,6 +197,11 @@ Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
 
 ## Release notes
 
+### v2.1.1
+
+- Added an admin overwrite warning when saving a buzzword on a date that already has one.
+- The overwrite warning can be confirmed or canceled before any Firebase write happens.
+
 ### v2.1.0
 
 - Improved Bingo square text sizing so longer phrases fit without awkward word breaks.
