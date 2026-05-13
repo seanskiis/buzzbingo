@@ -194,6 +194,43 @@ h1 {
   line-height: 1.5;
 }
 
+.app-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px clamp(18px, 4vw, 36px);
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 650;
+}
+
+.app-footer a {
+  color: var(--ink);
+  font-weight: 800;
+  text-decoration-color: rgba(23, 33, 43, 0.35);
+  text-underline-offset: 3px;
+}
+
+.app-footer a:hover {
+  text-decoration-color: currentColor;
+}
+
+.version-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 3px 8px;
+  border: 1px solid rgba(91, 101, 114, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.54);
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
 @media (max-width: 520px) {
   .app-header {
     position: static;
@@ -216,5 +253,13 @@ h1 {
 
   .count-button {
     min-height: 66px;
+  }
+
+  .app-footer {
+    position: static;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 0 18px 22px;
+    text-align: center;
   }
 }

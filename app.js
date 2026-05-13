@@ -12,6 +12,7 @@ const helperText = document.querySelector("#helperText");
 const connectionStatus = document.querySelector("#connectionStatus");
 const panel = document.querySelector(".counter-panel");
 const phraseLabel = document.querySelector("#phraseLabel");
+const appVersion = document.querySelector("#appVersion");
 
 const config = window.BUZZBINGO_FIREBASE_CONFIG;
 const currentPhrase = window.BUZZBINGO_CURRENT_PHRASE || {
@@ -23,6 +24,7 @@ const counterPath = `buzzwords/${currentPhrase.id}/count`;
 let unsubscribe = null;
 
 phraseLabel.textContent = currentPhrase.label;
+appVersion.textContent = window.BUZZBINGO_VERSION || "dev";
 
 function setState(state, message) {
   panel.classList.toggle("is-live", state === "live");

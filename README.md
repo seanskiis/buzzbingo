@@ -68,12 +68,35 @@ That sets up this structure as more phrases are added:
 
 Future versions can add labels, board layout, categories, or per-session bingo cards alongside each phrase without moving the existing counts.
 
+## Admin reset
+
+Do not add a public reset button until the app has real admin authentication. In the current no-login GitHub Pages version, anyone who can press a public reset button could clear the tally.
+
+For now, reset totals directly in Firebase:
+
+1. Open Firebase Console.
+2. Go to Realtime Database > Data.
+3. Open `buzzwords/forceMultiplier/count`.
+4. Set the value to `0`, or delete the `count` value if you want the next click to recreate it as `1`.
+
+Firebase Console admin edits are allowed even though public app writes are restricted by rules.
+
+## Versioning
+
+BuzzBingo uses semantic versioning in `version.js`.
+
+- Patch version: copy, styling, or documentation changes.
+- Minor version: new visible features or data-shape changes that remain backward compatible.
+- Major version: breaking Firebase structure changes or major workflow changes.
+
+Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
+
 ## Publish on GitHub Pages
 
-Commit this folder and enable GitHub Pages for the repo. If this folder is not the repo root, the page URL will usually be:
+Commit this folder and enable GitHub Pages for the repo. The published GitHub Pages URL is:
 
 ```text
-https://YOUR-GITHUB-USERNAME.github.io/YOUR-REPO-NAME/force-multiplier-counter/
+https://seanskiis.github.io/buzzbingo/
 ```
 
 ## Local preview
