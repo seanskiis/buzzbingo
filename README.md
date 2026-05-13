@@ -142,6 +142,12 @@ Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
 
 ## Release notes
 
+### v1.7.0
+
+- Replaced the hard-switch card navigation with an Embla-powered carousel.
+- Added drag/swipe movement so cards feel like they are physically moving between days.
+- Kept current-day counting, read-only history cards, and the intro card behavior intact.
+
 ### v1.6.0
 
 - Added a built-in intro card to the carousel for the first-day experience.

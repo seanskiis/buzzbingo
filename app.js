@@ -6,47 +6,33 @@ import {
   runTransaction,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
-const countDisplay = document.querySelector("#countDisplay");
-const countButton = document.querySelector("#countButton");
-const helperText = document.querySelector("#helperText");
-const connectionStatus = document.querySelector("#connectionStatus");
-const panel = document.querySelector(".counter-panel");
-const phraseLabel = document.querySelector("#phraseLabel");
 const appVersion = document.querySelector("#appVersion");
-const cardDateLabel = document.querySelector("#cardDateLabel");
-const cardInstruction = document.querySelector("#cardInstruction");
+const carouselViewport = document.querySelector("#carouselViewport");
+const cardContainer = document.querySelector("#cardContainer");
 const carouselPrev = document.querySelector("#carouselPrev");
 const carouselNext = document.querySelector("#carouselNext");
-const prevPreviewCard = document.querySelector("#prevPreviewCard");
-const nextPreviewCard = document.querySelector("#nextPreviewCard");
-const tallyLabel = document.querySelector(".tally-label");
 
 const config = window.BUZZBINGO_FIREBASE_CONFIG;
 const INTRO_CARD_KEY = "__buzzbingo_intro__";
+const emblaOptions = {
+  align: "center",
+  containScroll: "trimSnaps",
+  duration: 28,
+  loop: false,
+  skipSnaps: false,
+  startIndex: 0,
+};
 
 let activeDate = null;
-let activeCounterRef = null;
+let database = null;
+let dailyBuzzwordRecords = {};
+let dayKeys = [INTRO_CARD_KEY];
+let emblaApi = null;
+let selectedDayKey = null;
 let unsubscribeActiveDate = null;
 let unsubscribeHistory = null;
-let dailyBuzzwordRecords = {};
-let dayKeys = [];
-let visibleCardIndex = 0;
 
 appVersion.textContent = window.BUZZBINGO_VERSION || "dev";
-
-function setState(state, message) {
-  panel.classList.toggle("is-live", state === "live");
-  panel.classList.toggle("has-error", state === "error");
-  connectionStatus.textContent =
-    state === "live"
-      ? "Live tally"
-      : state === "read-only"
-        ? "Read only"
-        : state === "error"
-          ? "Setup needed"
-          : "Connecting";
-  helperText.textContent = message;
-}
 
 function formatCount(value) {
   return new Intl.NumberFormat().format(Number.isFinite(value) ? value : 0);
@@ -88,12 +74,6 @@ function hasFirebaseConfig(firebaseConfig) {
   );
 }
 
-function disableCounter(message) {
-  countDisplay.textContent = "0";
-  countButton.disabled = true;
-  setState("error", message);
-}
-
 function isIntroCard(dateKey) {
   return dateKey === INTRO_CARD_KEY;
 }
@@ -109,114 +89,223 @@ function getDayRecord(dateKey) {
   return dailyBuzzwordRecords?.[dateKey] || null;
 }
 
-function renderPreviewCard(element, dateKey) {
-  const record = getDayRecord(dateKey);
-
-  if (!record) {
-    element.innerHTML = "";
-    element.classList.remove("is-visible");
-    element.classList.remove("is-intro-preview");
-    return;
-  }
-
-  element.classList.add("is-visible");
-  element.classList.toggle("is-intro-preview", isIntroCard(dateKey));
-
+function getCardStatus(dateKey, record) {
   if (isIntroCard(dateKey)) {
-    element.innerHTML = `
-      <time>Start here</time>
-      <strong>What is this?</strong>
-    `;
-    return;
+    return {
+      className: "is-intro-card",
+      state: "read-only",
+    };
   }
 
-  element.innerHTML = `
-    <time datetime="${dateKey}">${formatDate(dateKey)}</time>
-    <strong>${escapeHtml(record.label || "Untitled buzzword")}</strong>
+  if (!record?.label) {
+    return {
+      className: "has-error",
+      state: "error",
+    };
+  }
+
+  if (dateKey === activeDate) {
+    return {
+      className: "is-live",
+      state: "live",
+    };
+  }
+
+  return {
+    className: "",
+    state: "read-only",
+  };
+}
+
+function renderIntroCard() {
+  return `
+    <div class="label-row">
+      <span class="live-dot" aria-hidden="true"></span>
+      <span>Field guide</span>
+    </div>
+
+    <p class="phrase-kicker">Orientation packet</p>
+    <h1>What is BuzzBingo?</h1>
+    <p class="subtitle">
+      A very serious, very scientific button for meetings where buzzwords reproduce in the air ducts.
+    </p>
+
+    <div class="tally-wrap" aria-live="polite">
+      <span class="tally-label">Threat level</span>
+      <strong class="tally">BZZ</strong>
+    </div>
+
+    <p class="helper-text">
+      Swipe back to today when someone deploys a phrase with too much confidence.
+    </p>
   `;
 }
 
-function renderVisibleCard() {
-  const visibleDate = dayKeys[visibleCardIndex];
-  const record = getDayRecord(visibleDate);
-  const isActive = visibleDate === activeDate;
-  const isIntro = isIntroCard(visibleDate);
+function renderBuzzwordCard(dateKey, record) {
+  const isActive = dateKey === activeDate;
 
-  renderPreviewCard(prevPreviewCard, dayKeys[visibleCardIndex + 1]);
-  renderPreviewCard(nextPreviewCard, dayKeys[visibleCardIndex - 1]);
-  carouselPrev.disabled = visibleCardIndex >= dayKeys.length - 1;
-  carouselNext.disabled = visibleCardIndex <= 0;
-  panel.classList.toggle("is-intro-card", isIntro);
+  if (!record?.label) {
+    return `
+      <div class="label-row">
+        <span class="live-dot" aria-hidden="true"></span>
+        <span>Setup needed</span>
+      </div>
 
-  if (!visibleDate || !record?.label) {
-    tallyLabel.textContent = "Total";
-    phraseLabel.textContent = "No buzzword set";
-    cardDateLabel.textContent = "Today's buzzword is";
-    cardInstruction.textContent = "Click the button whenever the buzzword enters the room.";
-    activeCounterRef = null;
-    disableCounter(activeDate ? `Add dailyBuzzwords/${activeDate} in Firebase.` : "Set settings/activeDate in Firebase.");
+      <p class="phrase-kicker">Today's buzzword is</p>
+      <h1>No buzzword set</h1>
+      <p class="subtitle">Click the button whenever the buzzword enters the room.</p>
+
+      <div class="tally-wrap" aria-live="polite">
+        <span class="tally-label">Total</span>
+        <strong class="tally">0</strong>
+      </div>
+
+      <p class="helper-text">${activeDate ? `Add dailyBuzzwords/${escapeHtml(activeDate)} in Firebase.` : "Set settings/activeDate in Firebase."}</p>
+    `;
+  }
+
+  return `
+    <div class="label-row">
+      <span class="live-dot" aria-hidden="true"></span>
+      <span>${isActive ? "Live tally" : "Read only"}</span>
+    </div>
+
+    <p class="phrase-kicker">${isActive ? "Today's buzzword is" : formatDate(dateKey)}</p>
+    <h1>${escapeHtml(record.label)}</h1>
+    <p class="subtitle">
+      ${isActive ? "Click the button whenever the buzzword enters the room." : "This day's total is locked."}
+    </p>
+
+    <div class="tally-wrap" aria-live="polite">
+      <span class="tally-label">Total</span>
+      <strong class="tally">${formatCount(typeof record.count === "number" ? record.count : 0)}</strong>
+    </div>
+
+    ${
+      isActive
+        ? `<button class="count-button" type="button" data-count-button data-date-key="${escapeHtml(dateKey)}">
+            <span class="button-icon" aria-hidden="true">+</span>
+            <span>I HEARD IT!</span>
+          </button>`
+        : ""
+    }
+
+    <p class="helper-text">${isActive ? `Tracking ${formatDate(dateKey)}.` : `${formatDate(dateKey)} final total.`}</p>
+  `;
+}
+
+function renderSlide(dateKey) {
+  const record = getDayRecord(dateKey);
+  const status = getCardStatus(dateKey, record);
+  const label = isIntroCard(dateKey) ? "BuzzBingo orientation card" : record?.label || "No buzzword set";
+
+  return `
+    <article
+      class="embla__slide"
+      data-day-key="${escapeHtml(dateKey)}"
+      aria-label="${escapeHtml(label)}"
+    >
+      <section class="counter-panel ${status.className}" aria-label="${escapeHtml(label)}" data-state="${status.state}">
+        ${isIntroCard(dateKey) ? renderIntroCard() : renderBuzzwordCard(dateKey, record)}
+      </section>
+    </article>
+  `;
+}
+
+function buildDayKeys(records) {
+  const keys = Object.keys(records || {}).sort((leftDate, rightDate) => rightDate.localeCompare(leftDate));
+
+  if (activeDate && !keys.includes(activeDate)) {
+    keys.unshift(activeDate);
+  }
+
+  keys.push(INTRO_CARD_KEY);
+  return keys;
+}
+
+function syncCarouselState() {
+  const selectedIndex = emblaApi ? emblaApi.selectedScrollSnap() : 0;
+
+  selectedDayKey = dayKeys[selectedIndex] || dayKeys[0] || INTRO_CARD_KEY;
+
+  carouselPrev.disabled = emblaApi ? !emblaApi.canScrollNext() : selectedIndex >= dayKeys.length - 1;
+  carouselNext.disabled = emblaApi ? !emblaApi.canScrollPrev() : selectedIndex <= 0;
+
+  cardContainer.querySelectorAll(".embla__slide").forEach((slide, index) => {
+    const isSelected = index === selectedIndex;
+    slide.classList.toggle("is-selected", isSelected);
+    slide.setAttribute("aria-hidden", isSelected ? "false" : "true");
+  });
+}
+
+function initOrRefreshCarousel(startIndex) {
+  if (!window.EmblaCarousel) {
+    carouselPrev.disabled = true;
+    carouselNext.disabled = true;
     return;
   }
 
-  if (isIntro) {
-    tallyLabel.textContent = "Threat level";
-    phraseLabel.textContent = record.label;
-    cardDateLabel.textContent = "Orientation packet";
-    cardInstruction.textContent =
-      "A very serious, very scientific button for meetings where buzzwords reproduce in the air ducts.";
-    countDisplay.textContent = "BZZ";
-    countButton.hidden = true;
-    countButton.disabled = true;
-    activeCounterRef = null;
-    setState("read-only", "Flip back to today when someone deploys a phrase with too much confidence.");
-    return;
-  }
-
-  tallyLabel.textContent = "Total";
-  phraseLabel.textContent = record.label;
-  cardDateLabel.textContent = isActive ? "Today's buzzword is" : formatDate(visibleDate);
-  cardInstruction.textContent = isActive
-    ? "Click the button whenever the buzzword enters the room."
-    : "This day's total is locked.";
-  countDisplay.textContent = formatCount(typeof record.count === "number" ? record.count : 0);
-  countButton.hidden = !isActive;
-  countButton.disabled = !isActive;
-  activeCounterRef = isActive ? activeCounterRef : null;
-
-  if (isActive) {
-    activeCounterRef = ref(database, `dailyBuzzwords/${activeDate}/count`);
-    setState("live", `Tracking ${formatDate(visibleDate)}.`);
+  if (!emblaApi) {
+    emblaApi = window.EmblaCarousel(carouselViewport, {
+      ...emblaOptions,
+      startIndex,
+    });
+    emblaApi.on("select", syncCarouselState);
+    emblaApi.on("settle", syncCarouselState);
+    emblaApi.on("reInit", syncCarouselState);
   } else {
-    setState("read-only", `${formatDate(visibleDate)} final total.`);
+    emblaApi.reInit(emblaOptions);
+    emblaApi.scrollTo(startIndex, true);
   }
+
+  syncCarouselState();
 }
 
 function renderCards(records) {
-  const currentVisibleDate = dayKeys[visibleCardIndex];
+  const preferredDayKey = selectedDayKey;
+
   dailyBuzzwordRecords = records || {};
-  dayKeys = Object.keys(dailyBuzzwordRecords).sort((leftDate, rightDate) => rightDate.localeCompare(leftDate));
+  dayKeys = buildDayKeys(dailyBuzzwordRecords);
 
-  if (activeDate && !dayKeys.includes(activeDate)) {
-    dayKeys.unshift(activeDate);
-  }
+  const preferredIndex = dayKeys.includes(preferredDayKey)
+    ? dayKeys.indexOf(preferredDayKey)
+    : dayKeys.indexOf(activeDate);
+  const startIndex = Math.max(preferredIndex, 0);
 
-  dayKeys.push(INTRO_CARD_KEY);
+  cardContainer.innerHTML = dayKeys.map(renderSlide).join("");
+  initOrRefreshCarousel(startIndex);
+}
 
-  if (currentVisibleDate && dayKeys.includes(currentVisibleDate)) {
-    visibleCardIndex = dayKeys.indexOf(currentVisibleDate);
-  } else {
-    visibleCardIndex = activeDate && dayKeys.includes(activeDate) ? dayKeys.indexOf(activeDate) : 0;
-  }
-
-  renderVisibleCard();
+function showSetupError(message) {
+  dailyBuzzwordRecords = {};
+  dayKeys = [INTRO_CARD_KEY];
+  cardContainer.innerHTML = `
+    <article class="embla__slide is-selected" data-day-key="${INTRO_CARD_KEY}" aria-label="BuzzBingo setup">
+      <section class="counter-panel has-error" aria-label="BuzzBingo setup">
+        <div class="label-row">
+          <span class="live-dot" aria-hidden="true"></span>
+          <span>Setup needed</span>
+        </div>
+        <p class="phrase-kicker">BuzzBingo needs a wire connected</p>
+        <h1>No live tally yet</h1>
+        <p class="subtitle">The cards are ready, but Firebase is still in the lobby looking for its badge.</p>
+        <div class="tally-wrap" aria-live="polite">
+          <span class="tally-label">Total</span>
+          <strong class="tally">0</strong>
+        </div>
+        <p class="helper-text">${escapeHtml(message)}</p>
+      </section>
+    </article>
+  `;
+  initOrRefreshCarousel(0);
 }
 
 if (!hasFirebaseConfig(config)) {
-  disableCounter("Add your Firebase settings to firebase-config.js before publishing.");
+  showSetupError("Add your Firebase settings to firebase-config.js before publishing.");
 } else {
   try {
     const app = initializeApp(config);
-    var database = getDatabase(app);
+    database = getDatabase(app);
 
     unsubscribeActiveDate = onValue(
       ref(database, "settings/activeDate"),
@@ -224,18 +313,16 @@ if (!hasFirebaseConfig(config)) {
         const nextActiveDate = snapshot.val();
 
         if (!nextActiveDate) {
-          phraseLabel.textContent = "No buzzword set";
-          activeCounterRef = null;
-          disableCounter("Set settings/activeDate in Firebase.");
+          activeDate = null;
+          renderCards(dailyBuzzwordRecords);
           return;
         }
 
         activeDate = nextActiveDate;
         renderCards(dailyBuzzwordRecords);
-        activeCounterRef = ref(database, `dailyBuzzwords/${activeDate}/count`);
       },
       (error) => {
-        disableCounter(`Firebase read failed: ${error.message}`);
+        showSetupError(`Firebase read failed: ${error.message}`);
       }
     );
 
@@ -243,31 +330,44 @@ if (!hasFirebaseConfig(config)) {
       ref(database, "dailyBuzzwords"),
       (snapshot) => renderCards(snapshot.val()),
       (error) => {
-        disableCounter(`Firebase history read failed: ${error.message}`);
+        showSetupError(`Firebase history read failed: ${error.message}`);
       }
     );
 
-    countButton.addEventListener("click", async () => {
-      if (!activeCounterRef) {
-        disableCounter("Set today's buzzword in Firebase first.");
+    cardContainer.addEventListener("click", async (event) => {
+      const button = event.target.closest("[data-count-button]");
+
+      if (!button) {
         return;
       }
 
-      countButton.disabled = true;
-      helperText.textContent = "Counting it...";
+      const buttonDateKey = button.dataset.dateKey;
+
+      if (!database || buttonDateKey !== activeDate) {
+        return;
+      }
+
+      button.disabled = true;
+      const helperText = button.closest(".counter-panel")?.querySelector(".helper-text");
+
+      if (helperText) {
+        helperText.textContent = "Counting it...";
+      }
 
       try {
-        await runTransaction(activeCounterRef, (currentValue) => {
+        await runTransaction(ref(database, `dailyBuzzwords/${activeDate}/count`), (currentValue) => {
           return (typeof currentValue === "number" ? currentValue : 0) + 1;
         });
       } catch (error) {
-        setState("error", `Firebase write failed: ${error.message}`);
+        if (helperText) {
+          helperText.textContent = `Firebase write failed: ${error.message}`;
+        }
       } finally {
-        countButton.disabled = false;
+        button.disabled = false;
       }
     });
   } catch (error) {
-    disableCounter(`Firebase setup failed: ${error.message}`);
+    showSetupError(`Firebase setup failed: ${error.message}`);
   }
 }
 
@@ -277,18 +377,20 @@ window.addEventListener("beforeunload", () => {
       unsubscribe();
     }
   });
+
+  if (emblaApi) {
+    emblaApi.destroy();
+  }
 });
 
 carouselPrev.addEventListener("click", () => {
-  if (visibleCardIndex < dayKeys.length - 1) {
-    visibleCardIndex += 1;
-    renderVisibleCard();
+  if (emblaApi) {
+    emblaApi.scrollNext();
   }
 });
 
 carouselNext.addEventListener("click", () => {
-  if (visibleCardIndex > 0) {
-    visibleCardIndex -= 1;
-    renderVisibleCard();
+  if (emblaApi) {
+    emblaApi.scrollPrev();
   }
 });

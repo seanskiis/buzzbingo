@@ -8,50 +8,42 @@
       name="description"
       content="A shared board for tracking corporate buzzwords in the wild."
     >
-    <link rel="icon" href="favicon-16.png?v=1.6.0" type="image/png" sizes="16x16">
-    <link rel="icon" href="favicon-32.png?v=1.6.0" type="image/png" sizes="32x32">
-    <link rel="icon" href="favicon.png?v=1.6.0" type="image/png" sizes="any">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=1.6.0">
-    <link rel="stylesheet" href="styles.css?v=1.6.0">
+    <link rel="icon" href="favicon-16.png?v=1.7.0" type="image/png" sizes="16x16">
+    <link rel="icon" href="favicon-32.png?v=1.7.0" type="image/png" sizes="32x32">
+    <link rel="icon" href="favicon.png?v=1.7.0" type="image/png" sizes="any">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=1.7.0">
+    <link rel="stylesheet" href="styles.css?v=1.7.0">
   </head>
   <body>
     <header class="app-header" aria-label="BuzzBingo">
       <a class="app-logo" href="./" aria-label="BuzzBingo home">
-        <img src="buzzbingo-header-logo.png?v=1.6.0" alt="BuzzBingo">
+        <img src="buzzbingo-header-logo.png?v=1.7.0" alt="BuzzBingo">
       </a>
     </header>
 
     <main class="counter-shell">
       <section class="card-stage" aria-label="Daily buzzword cards">
-        <article id="prevPreviewCard" class="preview-card preview-card-left" aria-hidden="true"></article>
-        <article id="nextPreviewCard" class="preview-card preview-card-right" aria-hidden="true"></article>
-
-        <section class="counter-panel" aria-labelledby="pageTitle">
-          <div class="label-row">
-            <span class="live-dot" aria-hidden="true"></span>
-            <span id="connectionStatus">Connecting</span>
+        <div id="buzzwordCarousel" class="embla" aria-live="polite">
+          <div id="carouselViewport" class="embla__viewport">
+            <div id="cardContainer" class="embla__container">
+              <article class="embla__slide is-selected" aria-label="Loading BuzzBingo">
+                <section class="counter-panel" aria-label="Loading BuzzBingo">
+                  <div class="label-row">
+                    <span class="live-dot" aria-hidden="true"></span>
+                    <span>Connecting</span>
+                  </div>
+                  <p class="phrase-kicker">Today's buzzword is</p>
+                  <h1>Loading...</h1>
+                  <p class="subtitle">Shared tally loads once Firebase is configured.</p>
+                  <div class="tally-wrap" aria-live="polite">
+                    <span class="tally-label">Total</span>
+                    <strong class="tally">-</strong>
+                  </div>
+                </section>
+              </article>
+            </div>
           </div>
-
-          <p id="cardDateLabel" class="phrase-kicker">Today's buzzword is</p>
-          <h1 id="pageTitle"><span id="phraseLabel">Force Multiplier</span></h1>
-          <p id="cardInstruction" class="subtitle">
-            Click the button whenever the buzzword enters the room.
-          </p>
-
-          <div class="tally-wrap" aria-live="polite">
-            <span class="tally-label">Total</span>
-            <strong id="countDisplay" class="tally">-</strong>
-          </div>
-
-          <button id="countButton" class="count-button" type="button" disabled>
-            <span class="button-icon" aria-hidden="true">+</span>
-            <span>I HEARD IT!</span>
-          </button>
-
-          <p id="helperText" class="helper-text">
-            Shared tally loads once Firebase is configured.
-          </p>
-        </section>
+        </div>
 
         <button id="carouselPrev" class="stage-nav stage-nav-left" type="button" aria-label="Previous day">‹</button>
         <button id="carouselNext" class="stage-nav stage-nav-right" type="button" aria-label="Next day">›</button>
@@ -68,7 +60,8 @@
     </footer>
 
     <script src="firebase-config.js"></script>
-    <script src="version.js?v=1.6.0"></script>
-    <script type="module" src="app.js?v=1.6.0"></script>
+    <script src="version.js?v=1.7.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/embla-carousel@8.6.0/embla-carousel.umd.js"></script>
+    <script type="module" src="app.js?v=1.7.0"></script>
   </body>
 </html>
