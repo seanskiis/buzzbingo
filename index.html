@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BuzzBingo</title>
+    <meta
+      name="description"
+      content="A shared board for tracking corporate buzzwords in the wild."
+    >
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="counter-shell">
+      <section class="counter-panel" aria-labelledby="pageTitle">
+        <div class="label-row">
+          <span class="live-dot" aria-hidden="true"></span>
+          <span id="connectionStatus">Connecting</span>
+        </div>
+
+        <h1 id="pageTitle">BuzzBingo</h1>
+        <p class="subtitle">
+          Today's square: <strong>"<span id="phraseLabel">Force Multiplier</span>"</strong>.
+          Tap every time the phrase enters the room.
+        </p>
+
+        <div class="tally-wrap" aria-live="polite">
+          <span class="tally-label">Total heard</span>
+          <strong id="countDisplay" class="tally">-</strong>
+        </div>
+
+        <button id="countButton" class="count-button" type="button" disabled>
+          <span class="button-icon" aria-hidden="true">+</span>
+          <span>I heard it</span>
+        </button>
+
+        <p id="helperText" class="helper-text">
+          Shared tally loads once Firebase is configured.
+        </p>
+      </section>
+    </main>
+
+    <script src="firebase-config.js"></script>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
