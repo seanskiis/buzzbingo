@@ -29,7 +29,7 @@ GitHub Pages can host the page, but it cannot store a shared count by itself. Th
 }
 ```
 
-When `settings/activeDate` is `TODAY`, BuzzBingo resolves it in the browser using the `America/Chicago` timezone and loads the matching `dailyBuzzwords/YYYY-MM-DD` record. Future dated records can be added ahead of time; they stay hidden until their date becomes active. Open browser tabs check once per minute and roll forward after the Central Time date changes.
+When `settings/activeDate` is `TODAY`, BuzzBingo resolves it in the browser using the `America/Chicago` timezone and loads the matching `dailyBuzzwords/YYYY-MM-DD` record. If no record exists for that date, the app keeps using the most recent earlier scheduled buzzword until a newer dated record takes over. Future dated records can be added ahead of time; they stay hidden until their date becomes active. Open browser tabs check once per minute and roll forward after the Central Time date changes.
 
 6. Enable Firebase Authentication > Sign-in method > Google.
 7. Sign in once at `/admin.html`, copy the UID shown on the page, and add it to Realtime Database:
@@ -119,7 +119,7 @@ Example:
 }
 ```
 
-Previous dates remain in `dailyBuzzwords`, so the app can show archived totals. Future dates can also remain in `dailyBuzzwords`; the app hides them until they are today or earlier.
+Previous dates remain in `dailyBuzzwords`, so the app can show archived totals. Future dates can also remain in `dailyBuzzwords`; the app hides them until they are today or earlier. Gaps are allowed: when a date has no record, BuzzBingo continues using the latest earlier buzzword and count.
 
 ## Daily admin workflow
 
@@ -177,6 +177,12 @@ BuzzBingo uses semantic versioning in `version.js`. Asset URLs in `index.html` a
 Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
 
 ## Release notes
+
+### v1.11.0
+
+- Added gap handling for the active buzzword schedule.
+- If today has no scheduled buzzword, the public app keeps using the most recent earlier buzzword.
+- Scheduled records can now work like start dates for future weekly or monthly buzzword modes.
 
 ### v1.10.1
 

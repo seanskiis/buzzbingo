@@ -31,6 +31,7 @@ let dailyBuzzwordRecords = {};
 let dayKeys = [INTRO_CARD_KEY];
 let emblaApi = null;
 let selectedDayKey = null;
+let targetActiveDate = null;
 let userSelectedCard = false;
 let unsubscribeActiveDate = null;
 let unsubscribeHistory = null;
@@ -107,6 +108,23 @@ function isIntroCard(dateKey) {
 
 function isDateKey(dateKey) {
   return /^\d{4}-\d{2}-\d{2}$/.test(String(dateKey));
+}
+
+function resolveEffectiveActiveDate(records, targetDate) {
+  if (!targetDate) {
+    return null;
+  }
+
+  if (records?.[targetDate]?.label) {
+    return targetDate;
+  }
+
+  const fallbackDate = Object.entries(records || {})
+    .filter(([dateKey, record]) => isDateKey(dateKey) && dateKey <= targetDate && record?.label)
+    .map(([dateKey]) => dateKey)
+    .sort((leftDate, rightDate) => rightDate.localeCompare(leftDate))[0];
+
+  return fallbackDate || targetDate;
 }
 
 function getDayRecord(dateKey) {
@@ -192,6 +210,7 @@ function renderIntroCard() {
 
 function renderBuzzwordCard(dateKey, record) {
   const isActive = dateKey === activeDate;
+  const isFallbackActive = isActive && targetActiveDate && dateKey !== targetActiveDate;
 
   if (!record?.label) {
     return `
@@ -219,7 +238,7 @@ function renderBuzzwordCard(dateKey, record) {
       <span>${isActive ? "Live tally" : "Read only"}</span>
     </div>
 
-    <p class="phrase-kicker">${isActive ? "Today's buzzword is" : formatDate(dateKey)}</p>
+    <p class="phrase-kicker">${isActive ? "Current buzzword is" : formatDate(dateKey)}</p>
     <h1 class="${getPhraseSizeClass(record.label)}">${escapeHtml(record.label)}</h1>
     <p class="subtitle">
       ${isActive ? "Click the button whenever the buzzword enters the room." : "This day's total is locked."}
@@ -239,7 +258,13 @@ function renderBuzzwordCard(dateKey, record) {
         : ""
     }
 
-    <p class="helper-text">${isActive ? `Tracking ${formatDate(dateKey)}.` : `${formatDate(dateKey)} final total.`}</p>
+    <p class="helper-text">${
+      isActive
+        ? isFallbackActive
+          ? `Still tracking ${formatDate(dateKey)} until the next buzzword appears.`
+          : `Tracking ${formatDate(dateKey)}.`
+        : `${formatDate(dateKey)} final total.`
+    }</p>
   `;
 }
 
@@ -262,8 +287,12 @@ function renderSlide(dateKey) {
 }
 
 function buildDayKeys(records) {
+  if (!targetActiveDate) {
+    return [INTRO_CARD_KEY];
+  }
+
   const keys = Object.keys(records || {})
-    .filter((dateKey) => isDateKey(dateKey) && (!activeDate || dateKey <= activeDate))
+    .filter((dateKey) => isDateKey(dateKey) && dateKey <= targetActiveDate)
     .sort((leftDate, rightDate) => rightDate.localeCompare(leftDate));
 
   if (activeDate && !keys.includes(activeDate)) {
@@ -319,9 +348,9 @@ function initOrRefreshCarousel(startIndex) {
 }
 
 function renderCards(records) {
-  const preferredDayKey = userSelectedCard ? selectedDayKey : activeDate;
-
   dailyBuzzwordRecords = records || {};
+  activeDate = resolveEffectiveActiveDate(dailyBuzzwordRecords, targetActiveDate);
+  const preferredDayKey = userSelectedCard ? selectedDayKey : activeDate;
   dayKeys = buildDayKeys(dailyBuzzwordRecords);
 
   const preferredIndex = dayKeys.includes(preferredDayKey)
@@ -368,15 +397,16 @@ if (!hasFirebaseConfig(config)) {
       ref(database, "settings/activeDate"),
       (snapshot) => {
         activeDateSetting = snapshot.val();
-        const nextActiveDate = resolveActiveDate(activeDateSetting);
+        const nextTargetActiveDate = resolveActiveDate(activeDateSetting);
 
-        if (!nextActiveDate) {
+        if (!nextTargetActiveDate) {
+          targetActiveDate = null;
           activeDate = null;
           renderCards(dailyBuzzwordRecords);
           return;
         }
 
-        activeDate = nextActiveDate;
+        targetActiveDate = nextTargetActiveDate;
         renderCards(dailyBuzzwordRecords);
       },
       (error) => {
@@ -446,10 +476,10 @@ window.setInterval(() => {
     return;
   }
 
-  const nextActiveDate = resolveActiveDate(activeDateSetting);
+  const nextTargetActiveDate = resolveActiveDate(activeDateSetting);
 
-  if (nextActiveDate && nextActiveDate !== activeDate) {
-    activeDate = nextActiveDate;
+  if (nextTargetActiveDate && nextTargetActiveDate !== targetActiveDate) {
+    targetActiveDate = nextTargetActiveDate;
     userSelectedCard = false;
     renderCards(dailyBuzzwordRecords);
   }
