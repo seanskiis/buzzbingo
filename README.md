@@ -178,6 +178,11 @@ Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
 
 ## Release notes
 
+### v1.10.1
+
+- Added a cancel button while editing future scheduled buzzwords in the admin utility.
+- Canceling an edit restores the blank save form without writing anything to Firebase.
+
 ### v1.10.0
 
 - Added a full admin schedule list for past, current, and future buzzwords.

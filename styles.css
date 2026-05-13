@@ -467,9 +467,22 @@ h1.phrase-size-xl {
   border-color: rgba(31, 138, 138, 0.55);
 }
 
+.admin-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 8px auto 0;
+}
+
 .admin-save-button {
   width: min(100%, 360px);
-  margin: 8px auto 0;
+}
+
+.admin-cancel-button {
+  min-height: 54px;
+  padding: 0 22px;
 }
 
 .helper-text.has-message-error {
@@ -687,6 +700,16 @@ h1.phrase-size-xl {
 
   .secondary-button {
     flex: 1;
+  }
+
+  .admin-form-actions {
+    width: 100%;
+  }
+
+  .admin-save-button,
+  .admin-cancel-button {
+    flex: 1 1 100%;
+    width: 100%;
   }
 
   .schedule-heading,

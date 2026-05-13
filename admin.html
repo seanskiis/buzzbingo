@@ -8,16 +8,16 @@
       name="description"
       content="Admin utility for scheduling BuzzBingo buzzwords."
     >
-    <link rel="icon" href="favicon-16.png?v=1.10.0" type="image/png" sizes="16x16">
-    <link rel="icon" href="favicon-32.png?v=1.10.0" type="image/png" sizes="32x32">
-    <link rel="icon" href="favicon.png?v=1.10.0" type="image/png" sizes="any">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=1.10.0">
-    <link rel="stylesheet" href="styles.css?v=1.10.0">
+    <link rel="icon" href="favicon-16.png?v=1.10.1" type="image/png" sizes="16x16">
+    <link rel="icon" href="favicon-32.png?v=1.10.1" type="image/png" sizes="32x32">
+    <link rel="icon" href="favicon.png?v=1.10.1" type="image/png" sizes="any">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=1.10.1">
+    <link rel="stylesheet" href="styles.css?v=1.10.1">
   </head>
   <body class="admin-page">
     <header class="app-header" aria-label="BuzzBingo">
       <a class="app-logo" href="./" aria-label="BuzzBingo home">
-        <img src="buzzbingo-header-logo.png?v=1.10.0" alt="BuzzBingo">
+        <img src="buzzbingo-header-logo.png?v=1.10.1" alt="BuzzBingo">
       </a>
     </header>
 
@@ -61,10 +61,15 @@
             >
           </label>
 
-          <button id="saveButton" class="count-button admin-save-button" type="submit">
-            <span class="button-icon" aria-hidden="true">+</span>
-            <span>Save buzzword</span>
-          </button>
+          <div class="admin-form-actions">
+            <button id="saveButton" class="count-button admin-save-button" type="submit">
+              <span class="button-icon" aria-hidden="true">+</span>
+              <span>Save buzzword</span>
+            </button>
+            <button id="cancelEditButton" class="secondary-button admin-cancel-button" type="button" hidden>
+              Cancel
+            </button>
+          </div>
 
           <p id="saveStatus" class="helper-text" aria-live="polite"></p>
         </form>
@@ -93,7 +98,7 @@
     </footer>
 
     <script src="firebase-config.js"></script>
-    <script src="version.js?v=1.10.0"></script>
-    <script type="module" src="admin.js?v=1.10.0"></script>
+    <script src="version.js?v=1.10.1"></script>
+    <script type="module" src="admin.js?v=1.10.1"></script>
   </body>
 </html>

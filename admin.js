@@ -27,6 +27,7 @@ const buzzwordForm = document.querySelector("#buzzwordForm");
 const buzzwordDate = document.querySelector("#buzzwordDate");
 const buzzwordLabel = document.querySelector("#buzzwordLabel");
 const saveButton = document.querySelector("#saveButton");
+const cancelEditButton = document.querySelector("#cancelEditButton");
 const saveStatus = document.querySelector("#saveStatus");
 const scheduleSection = document.querySelector("#scheduleSection");
 const scheduleSummary = document.querySelector("#scheduleSummary");
@@ -117,6 +118,7 @@ function resetForm() {
   buzzwordDate.value = getDateKeyInTimeZone();
   buzzwordLabel.value = "";
   saveButton.querySelector("span:last-child").textContent = "Save buzzword";
+  cancelEditButton.hidden = true;
 }
 
 function escapeHtml(value) {
@@ -246,6 +248,7 @@ function loadFutureBuzzwordForEdit(dateKey) {
   buzzwordDate.value = dateKey;
   buzzwordLabel.value = record.label || "";
   saveButton.querySelector("span:last-child").textContent = "Update buzzword";
+  cancelEditButton.hidden = false;
   setSaveStatus(`Editing ${dateKey}.`);
   buzzwordLabel.focus();
 }
@@ -324,6 +327,12 @@ scheduleList.addEventListener("click", (event) => {
   }
 
   loadFutureBuzzwordForEdit(editButton.dataset.editDate);
+});
+
+cancelEditButton.addEventListener("click", () => {
+  resetForm();
+  setSaveStatus("Edit canceled.");
+  buzzwordLabel.focus();
 });
 
 buzzwordForm.addEventListener("submit", saveBuzzword);
