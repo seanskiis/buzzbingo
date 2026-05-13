@@ -8,16 +8,16 @@
       name="description"
       content="Admin utility for scheduling BuzzBingo buzzwords."
     >
-    <link rel="icon" href="favicon-16.png?v=2.2.0" type="image/png" sizes="16x16">
-    <link rel="icon" href="favicon-32.png?v=2.2.0" type="image/png" sizes="32x32">
-    <link rel="icon" href="favicon.png?v=2.2.0" type="image/png" sizes="any">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2.2.0">
-    <link rel="stylesheet" href="styles.css?v=2.2.0">
+    <link rel="icon" href="favicon-16.png?v=2.3.0" type="image/png" sizes="16x16">
+    <link rel="icon" href="favicon-32.png?v=2.3.0" type="image/png" sizes="32x32">
+    <link rel="icon" href="favicon.png?v=2.3.0" type="image/png" sizes="any">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2.3.0">
+    <link rel="stylesheet" href="styles.css?v=2.3.0">
   </head>
   <body class="admin-page">
     <header class="app-header" aria-label="BuzzBingo">
       <a class="app-logo" href="./" aria-label="BuzzBingo home">
-        <img src="buzzbingo-header-logo.png?v=2.2.0" alt="BuzzBingo">
+        <img src="buzzbingo-header-logo.png?v=2.3.0" alt="BuzzBingo">
       </a>
       <nav class="app-nav" aria-label="Primary">
         <a href="./">Buzz Word of the Day</a>
@@ -94,6 +94,40 @@
 
           <div id="scheduleList" class="schedule-list" aria-live="polite"></div>
         </section>
+
+        <section id="messageSection" class="schedule-section" hidden>
+          <div class="schedule-heading">
+            <div>
+              <p class="phrase-kicker">Celebrations</p>
+              <h2>Win Messages</h2>
+            </div>
+            <p id="messageSummary">Loading messages...</p>
+          </div>
+
+          <form id="messageForm" class="admin-form">
+            <label>
+              Congratulations message
+              <textarea
+                id="messageText"
+                name="messageText"
+                maxlength="180"
+                placeholder="You won a tidbit of joy and more meetings!"
+                required
+              ></textarea>
+            </label>
+
+            <div class="admin-form-actions">
+              <button id="saveMessageButton" class="count-button admin-save-button" type="submit">
+                <span class="button-icon" aria-hidden="true">+</span>
+                <span>Save message</span>
+              </button>
+            </div>
+
+            <p id="messageStatus" class="helper-text" aria-live="polite"></p>
+          </form>
+
+          <div id="messageList" class="schedule-list" aria-live="polite"></div>
+        </section>
       </section>
     </main>
 
@@ -121,7 +155,7 @@
     </div>
 
     <script src="firebase-config.js"></script>
-    <script src="version.js?v=2.2.0"></script>
-    <script type="module" src="admin.js?v=2.2.0"></script>
+    <script src="version.js?v=2.3.0"></script>
+    <script type="module" src="admin.js?v=2.3.0"></script>
   </body>
 </html>

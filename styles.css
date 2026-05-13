@@ -511,7 +511,8 @@ h1.phrase-size-xl {
 
 .admin-form input[type="date"],
 .admin-form input[type="number"],
-.admin-form input[type="text"] {
+.admin-form input[type="text"],
+.admin-form textarea {
   min-height: 48px;
   width: 100%;
   border: 1px solid var(--border);
@@ -521,6 +522,12 @@ h1.phrase-size-xl {
   background: rgba(255, 255, 255, 0.86);
   font: inherit;
   font-size: 1rem;
+}
+
+.admin-form textarea {
+  min-height: 112px;
+  resize: vertical;
+  line-height: 1.45;
 }
 
 .admin-form input:focus {
@@ -590,6 +597,7 @@ h1.phrase-size-xl {
 }
 
 .schedule-row,
+.message-row,
 .schedule-empty {
   display: flex;
   align-items: center;
@@ -601,6 +609,10 @@ h1.phrase-size-xl {
   background: rgba(255, 255, 255, 0.7);
 }
 
+.message-row {
+  margin-top: 10px;
+}
+
 .schedule-empty {
   justify-content: center;
   color: var(--muted);
@@ -609,13 +621,15 @@ h1.phrase-size-xl {
 }
 
 .schedule-row time,
-.schedule-row span {
+.schedule-row span,
+.message-row span {
   color: var(--muted);
   font-size: 0.84rem;
   font-weight: 750;
 }
 
-.schedule-row strong {
+.schedule-row strong,
+.message-row strong {
   display: block;
   margin: 4px 0;
   color: var(--ink);
@@ -1009,7 +1023,8 @@ h1.phrase-size-xl {
   }
 
   .schedule-heading,
-  .schedule-row {
+  .schedule-row,
+  .message-row {
     align-items: stretch;
     flex-direction: column;
   }

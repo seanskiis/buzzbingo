@@ -204,7 +204,7 @@ Open `/bingo.html` to generate a 5x5 Bingo card from `dailyBuzzwords` records wh
 
 Cards are randomized and stored in `sessionStorage`, so a visitor keeps the same word placement and marked squares for the current browser session. If there are fewer than 24 eligible buzzwords, the app repeats eligible words to fill the card.
 
-Win messages are pulled from `bingoMessages` in Firebase. Add another child string there whenever you want the modal to have more possible messages.
+Win messages are pulled from `bingoMessages` in Firebase. Add another child string there whenever you want the modal to have more possible messages, or use the Win Messages section in `/admin.html`.
 
 ## Versioning
 
@@ -217,6 +217,12 @@ BuzzBingo uses semantic versioning in `version.js`. Asset URLs in `index.html` a
 Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
 
 ## Release notes
+
+### v2.3.0
+
+- Added a Win Messages admin section for saving Bingo congratulations messages.
+- Admins can now add Firebase-backed win messages without editing raw JSON.
+- Added a live admin list of saved win messages and their generated IDs.
 
 ### v2.2.0
 

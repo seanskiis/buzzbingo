@@ -33,6 +33,13 @@ const saveStatus = document.querySelector("#saveStatus");
 const scheduleSection = document.querySelector("#scheduleSection");
 const scheduleSummary = document.querySelector("#scheduleSummary");
 const scheduleList = document.querySelector("#scheduleList");
+const messageSection = document.querySelector("#messageSection");
+const messageForm = document.querySelector("#messageForm");
+const messageText = document.querySelector("#messageText");
+const saveMessageButton = document.querySelector("#saveMessageButton");
+const messageStatus = document.querySelector("#messageStatus");
+const messageSummary = document.querySelector("#messageSummary");
+const messageList = document.querySelector("#messageList");
 const overwriteModal = document.querySelector("#overwriteModal");
 const confirmOverwriteButton = document.querySelector("#confirmOverwriteButton");
 const cancelOverwriteButton = document.querySelector("#cancelOverwriteButton");
@@ -43,10 +50,12 @@ let auth = null;
 let database = null;
 let currentUser = null;
 let dailyBuzzwords = {};
+let bingoMessages = {};
 let editingDateKey = null;
 let isAdmin = false;
 let overwriteResolver = null;
 let previouslyFocusedElement = null;
+let unsubscribeMessages = null;
 let unsubscribeSchedule = null;
 
 appVersion.textContent = window.BUZZBINGO_VERSION || "dev";
@@ -107,7 +116,11 @@ function setAuthState(message, detail) {
 function setFormAvailability(enabled) {
   buzzwordForm.hidden = !enabled;
   scheduleSection.hidden = !enabled;
+  messageSection.hidden = !enabled;
   buzzwordForm.querySelectorAll("input, button").forEach((control) => {
+    control.disabled = !enabled;
+  });
+  messageForm.querySelectorAll("textarea, button").forEach((control) => {
     control.disabled = !enabled;
   });
 }
@@ -146,6 +159,10 @@ function formatCount(value) {
   return Number.isFinite(value) ? new Intl.NumberFormat().format(value) : "0";
 }
 
+function normalizeMessageRecord(record) {
+  return typeof record === "string" ? record : record?.message || record?.text || "";
+}
+
 function getScheduleStatus(dateKey, todayKey) {
   if (dateKey > todayKey) {
     return {
@@ -165,6 +182,40 @@ function getScheduleStatus(dateKey, todayKey) {
     className: "is-locked",
     label: "Locked",
   };
+}
+
+function renderMessages(records) {
+  const rows = Object.entries(records || {})
+    .map(([messageId, record]) => [messageId, normalizeMessageRecord(record).trim()])
+    .filter(([, message]) => message)
+    .sort(([leftId], [rightId]) => leftId.localeCompare(rightId));
+
+  bingoMessages = Object.fromEntries(rows);
+  messageSummary.textContent = rows.length
+    ? `${rows.length} saved ${rows.length === 1 ? "message" : "messages"}.`
+    : "No win messages are saved yet.";
+
+  if (!rows.length) {
+    messageList.innerHTML = `
+      <article class="schedule-empty">
+        Add a congratulations message above to start the celebration library.
+      </article>
+    `;
+    return;
+  }
+
+  messageList.innerHTML = rows
+    .map(([messageId, message]) => {
+      return `
+        <article class="message-row">
+          <div>
+            <strong>${escapeHtml(message)}</strong>
+            <span>${escapeHtml(messageId)}</span>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
 }
 
 function renderSchedule(records) {
@@ -221,6 +272,23 @@ function renderSchedule(records) {
     .join("");
 }
 
+function startMessageListener() {
+  if (unsubscribeMessages) {
+    unsubscribeMessages();
+  }
+
+  messageSummary.textContent = "Loading messages...";
+  messageList.innerHTML = "";
+  unsubscribeMessages = onValue(
+    ref(database, "bingoMessages"),
+    (snapshot) => renderMessages(snapshot.val()),
+    (error) => {
+      messageSummary.textContent = `Message load failed: ${error.message}`;
+      messageList.innerHTML = "";
+    }
+  );
+}
+
 function startScheduleListener() {
   if (unsubscribeSchedule) {
     unsubscribeSchedule();
@@ -238,6 +306,17 @@ function startScheduleListener() {
   );
 }
 
+function stopMessageListener() {
+  if (unsubscribeMessages) {
+    unsubscribeMessages();
+    unsubscribeMessages = null;
+  }
+
+  bingoMessages = {};
+  messageSummary.textContent = "Loading messages...";
+  messageList.innerHTML = "";
+}
+
 function stopScheduleListener() {
   if (unsubscribeSchedule) {
     unsubscribeSchedule();
@@ -247,6 +326,10 @@ function stopScheduleListener() {
   dailyBuzzwords = {};
   scheduleSummary.textContent = "Loading schedule...";
   scheduleList.innerHTML = "";
+}
+
+function resetMessageForm() {
+  messageText.value = "";
 }
 
 function loadFutureBuzzwordForEdit(dateKey) {
@@ -293,6 +376,11 @@ function confirmOverwrite() {
   return new Promise((resolve) => {
     overwriteResolver = resolve;
   });
+}
+
+function setMessageStatus(message, isError = false) {
+  messageStatus.textContent = message;
+  messageStatus.classList.toggle("has-message-error", isError);
 }
 
 async function saveBuzzword(event) {
@@ -355,6 +443,36 @@ async function saveBuzzword(event) {
   }
 }
 
+async function saveMessage(event) {
+  event.preventDefault();
+
+  if (!currentUser || !isAdmin) {
+    setMessageStatus("Sign in with an admin account first.", true);
+    return;
+  }
+
+  const message = messageText.value.trim();
+  const messageId = slugify(message).slice(0, 56);
+
+  if (!message || !messageId) {
+    setMessageStatus("Add a congratulations message.", true);
+    return;
+  }
+
+  saveMessageButton.disabled = true;
+  setMessageStatus("Saving...");
+
+  try {
+    await set(ref(database, `bingoMessages/${messageId}`), message);
+    setMessageStatus("Saved message.");
+    resetMessageForm();
+  } catch (error) {
+    setMessageStatus(`Save failed: ${error.message}`, true);
+  } finally {
+    saveMessageButton.disabled = false;
+  }
+}
+
 signInButton.addEventListener("click", async () => {
   if (!auth) {
     setAuthState("Firebase not ready", "Add Firebase config before using the admin utility.");
@@ -406,7 +524,9 @@ window.addEventListener("keydown", (event) => {
 });
 
 buzzwordForm.addEventListener("submit", saveBuzzword);
+messageForm.addEventListener("submit", saveMessage);
 resetForm();
+resetMessageForm();
 setFormAvailability(false);
 
 if (!hasFirebaseConfig(config)) {
@@ -423,7 +543,9 @@ if (!hasFirebaseConfig(config)) {
     signOutButton.hidden = !user;
     setFormAvailability(false);
     setSaveStatus("");
+    setMessageStatus("");
     stopScheduleListener();
+    stopMessageListener();
 
     if (!user) {
       setAuthState("Not signed in", "Sign in with Google to check admin access.");
@@ -443,6 +565,7 @@ if (!hasFirebaseConfig(config)) {
       setAuthState("Admin access ready", user.email || user.uid);
       setFormAvailability(true);
       startScheduleListener();
+      startMessageListener();
     } catch (error) {
       setAuthState("Admin check failed", error.message);
     }

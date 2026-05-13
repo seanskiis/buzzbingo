@@ -1,1 +1,1 @@
-window.BUZZBINGO_VERSION = "2.2.0";
+window.BUZZBINGO_VERSION = "2.3.0";
