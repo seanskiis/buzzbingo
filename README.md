@@ -142,6 +142,12 @@ Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
 
 ## Release notes
 
+### v1.6.0
+
+- Added a built-in intro card to the carousel for the first-day experience.
+- The intro card explains the app's purpose without requiring a Firebase record.
+- Current and historical daily cards still keep their existing live/read-only behavior.
+
 ### v1.5.0
 
 - Replaced the separate carousel section with a flippable main card stage.

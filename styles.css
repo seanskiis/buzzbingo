@@ -115,6 +115,10 @@ body {
   opacity: 1;
 }
 
+.preview-card.is-intro-preview::before {
+  background: rgba(31, 138, 138, 0.46);
+}
+
 .preview-card-left {
   left: 0;
   transform: translate(-9%, -50%) scale(0.92);
@@ -206,6 +210,11 @@ body {
   background: var(--accent);
 }
 
+.is-intro-card .live-dot {
+  background: #f0b429;
+  box-shadow: 0 0 0 5px rgba(240, 180, 41, 0.18);
+}
+
 .phrase-kicker {
   margin: 34px 0 10px;
   color: var(--muted);
@@ -251,6 +260,20 @@ h1 {
   line-height: 0.9;
 }
 
+.is-intro-card h1 {
+  max-width: 11em;
+  font-size: clamp(2.45rem, 11vw, 3.9rem);
+}
+
+.is-intro-card .subtitle {
+  max-width: 22rem;
+}
+
+.is-intro-card .tally {
+  color: var(--accent);
+  font-size: clamp(3.4rem, 15vw, 5rem);
+}
+
 .count-button {
   display: inline-flex;
   align-items: center;
@@ -271,6 +294,10 @@ h1 {
     transform 120ms ease,
     background 120ms ease,
     box-shadow 120ms ease;
+}
+
+.count-button[hidden] {
+  display: none;
 }
 
 .count-button:hover {

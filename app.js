@@ -19,8 +19,10 @@ const carouselPrev = document.querySelector("#carouselPrev");
 const carouselNext = document.querySelector("#carouselNext");
 const prevPreviewCard = document.querySelector("#prevPreviewCard");
 const nextPreviewCard = document.querySelector("#nextPreviewCard");
+const tallyLabel = document.querySelector(".tally-label");
 
 const config = window.BUZZBINGO_FIREBASE_CONFIG;
+const INTRO_CARD_KEY = "__buzzbingo_intro__";
 
 let activeDate = null;
 let activeCounterRef = null;
@@ -92,7 +94,18 @@ function disableCounter(message) {
   setState("error", message);
 }
 
+function isIntroCard(dateKey) {
+  return dateKey === INTRO_CARD_KEY;
+}
+
 function getDayRecord(dateKey) {
+  if (isIntroCard(dateKey)) {
+    return {
+      label: "What is BuzzBingo?",
+      count: null,
+    };
+  }
+
   return dailyBuzzwordRecords?.[dateKey] || null;
 }
 
@@ -102,10 +115,21 @@ function renderPreviewCard(element, dateKey) {
   if (!record) {
     element.innerHTML = "";
     element.classList.remove("is-visible");
+    element.classList.remove("is-intro-preview");
     return;
   }
 
   element.classList.add("is-visible");
+  element.classList.toggle("is-intro-preview", isIntroCard(dateKey));
+
+  if (isIntroCard(dateKey)) {
+    element.innerHTML = `
+      <time>Start here</time>
+      <strong>What is this?</strong>
+    `;
+    return;
+  }
+
   element.innerHTML = `
     <time datetime="${dateKey}">${formatDate(dateKey)}</time>
     <strong>${escapeHtml(record.label || "Untitled buzzword")}</strong>
@@ -116,13 +140,16 @@ function renderVisibleCard() {
   const visibleDate = dayKeys[visibleCardIndex];
   const record = getDayRecord(visibleDate);
   const isActive = visibleDate === activeDate;
+  const isIntro = isIntroCard(visibleDate);
 
   renderPreviewCard(prevPreviewCard, dayKeys[visibleCardIndex + 1]);
   renderPreviewCard(nextPreviewCard, dayKeys[visibleCardIndex - 1]);
   carouselPrev.disabled = visibleCardIndex >= dayKeys.length - 1;
   carouselNext.disabled = visibleCardIndex <= 0;
+  panel.classList.toggle("is-intro-card", isIntro);
 
   if (!visibleDate || !record?.label) {
+    tallyLabel.textContent = "Total";
     phraseLabel.textContent = "No buzzword set";
     cardDateLabel.textContent = "Today's buzzword is";
     cardInstruction.textContent = "Click the button whenever the buzzword enters the room.";
@@ -131,6 +158,21 @@ function renderVisibleCard() {
     return;
   }
 
+  if (isIntro) {
+    tallyLabel.textContent = "Threat level";
+    phraseLabel.textContent = record.label;
+    cardDateLabel.textContent = "Orientation packet";
+    cardInstruction.textContent =
+      "A very serious, very scientific button for meetings where buzzwords reproduce in the air ducts.";
+    countDisplay.textContent = "BZZ";
+    countButton.hidden = true;
+    countButton.disabled = true;
+    activeCounterRef = null;
+    setState("read-only", "Flip back to today when someone deploys a phrase with too much confidence.");
+    return;
+  }
+
+  tallyLabel.textContent = "Total";
   phraseLabel.textContent = record.label;
   cardDateLabel.textContent = isActive ? "Today's buzzword is" : formatDate(visibleDate);
   cardInstruction.textContent = isActive
@@ -150,6 +192,7 @@ function renderVisibleCard() {
 }
 
 function renderCards(records) {
+  const currentVisibleDate = dayKeys[visibleCardIndex];
   dailyBuzzwordRecords = records || {};
   dayKeys = Object.keys(dailyBuzzwordRecords).sort((leftDate, rightDate) => rightDate.localeCompare(leftDate));
 
@@ -157,7 +200,14 @@ function renderCards(records) {
     dayKeys.unshift(activeDate);
   }
 
-  visibleCardIndex = activeDate && dayKeys.includes(activeDate) ? dayKeys.indexOf(activeDate) : 0;
+  dayKeys.push(INTRO_CARD_KEY);
+
+  if (currentVisibleDate && dayKeys.includes(currentVisibleDate)) {
+    visibleCardIndex = dayKeys.indexOf(currentVisibleDate);
+  } else {
+    visibleCardIndex = activeDate && dayKeys.includes(activeDate) ? dayKeys.indexOf(activeDate) : 0;
+  }
+
   renderVisibleCard();
 }
 
