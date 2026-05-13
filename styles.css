@@ -64,6 +64,7 @@ body {
   position: relative;
   width: min(100%, 820px);
   min-height: min(680px, calc(100vh - 164px));
+  margin: 0 auto;
 }
 
 .embla {
@@ -82,14 +83,14 @@ body {
 
 .embla__container {
   display: flex;
-  margin-left: calc(clamp(16px, 5vw, 44px) * -1);
+  gap: clamp(18px, 5vw, 44px);
+  padding-inline: calc((100% - min(78%, 520px)) / 2);
   touch-action: pan-y pinch-zoom;
 }
 
 .embla__slide {
   min-width: 0;
   flex: 0 0 min(78%, 520px);
-  padding-left: clamp(16px, 5vw, 44px);
   transition:
     opacity 220ms ease,
     transform 220ms ease;
@@ -365,12 +366,20 @@ h1 {
   }
 
   .embla__container {
-    margin-left: -14px;
+    gap: 14px;
+    padding-inline: 8%;
   }
 
   .embla__slide {
     flex-basis: 84%;
-    padding-left: 14px;
+  }
+
+  .embla__slide.is-selected.is-edge-start {
+    transform: translateX(42px) scale(1) rotate(0);
+  }
+
+  .embla__slide.is-selected.is-edge-end {
+    transform: translateX(-42px) scale(1) rotate(0);
   }
 
   .counter-panel {

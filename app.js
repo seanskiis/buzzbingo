@@ -16,7 +16,6 @@ const config = window.BUZZBINGO_FIREBASE_CONFIG;
 const INTRO_CARD_KEY = "__buzzbingo_intro__";
 const emblaOptions = {
   align: "center",
-  containScroll: "trimSnaps",
   duration: 28,
   loop: false,
   skipSnaps: false,
@@ -29,6 +28,7 @@ let dailyBuzzwordRecords = {};
 let dayKeys = [INTRO_CARD_KEY];
 let emblaApi = null;
 let selectedDayKey = null;
+let userSelectedCard = false;
 let unsubscribeActiveDate = null;
 let unsubscribeHistory = null;
 
@@ -136,7 +136,7 @@ function renderIntroCard() {
     </div>
 
     <p class="helper-text">
-      Swipe back to today when someone deploys a phrase with too much confidence.
+      Swipe forward to today when someone deploys a phrase with too much confidence.
     </p>
   `;
 }
@@ -219,8 +219,7 @@ function buildDayKeys(records) {
     keys.unshift(activeDate);
   }
 
-  keys.push(INTRO_CARD_KEY);
-  return keys;
+  return [INTRO_CARD_KEY, ...keys];
 }
 
 function syncCarouselState() {
@@ -228,14 +227,20 @@ function syncCarouselState() {
 
   selectedDayKey = dayKeys[selectedIndex] || dayKeys[0] || INTRO_CARD_KEY;
 
-  carouselPrev.disabled = emblaApi ? !emblaApi.canScrollNext() : selectedIndex >= dayKeys.length - 1;
-  carouselNext.disabled = emblaApi ? !emblaApi.canScrollPrev() : selectedIndex <= 0;
+  carouselPrev.disabled = emblaApi ? !emblaApi.canScrollPrev() : selectedIndex <= 0;
+  carouselNext.disabled = emblaApi ? !emblaApi.canScrollNext() : selectedIndex >= dayKeys.length - 1;
 
   cardContainer.querySelectorAll(".embla__slide").forEach((slide, index) => {
     const isSelected = index === selectedIndex;
     slide.classList.toggle("is-selected", isSelected);
+    slide.classList.toggle("is-edge-start", isSelected && index === 0);
+    slide.classList.toggle("is-edge-end", isSelected && index === dayKeys.length - 1);
     slide.setAttribute("aria-hidden", isSelected ? "false" : "true");
   });
+}
+
+function markUserSelectedCard() {
+  userSelectedCard = true;
 }
 
 function initOrRefreshCarousel(startIndex) {
@@ -251,6 +256,7 @@ function initOrRefreshCarousel(startIndex) {
       startIndex,
     });
     emblaApi.on("select", syncCarouselState);
+    emblaApi.on("pointerDown", markUserSelectedCard);
     emblaApi.on("settle", syncCarouselState);
     emblaApi.on("reInit", syncCarouselState);
   } else {
@@ -262,7 +268,7 @@ function initOrRefreshCarousel(startIndex) {
 }
 
 function renderCards(records) {
-  const preferredDayKey = selectedDayKey;
+  const preferredDayKey = userSelectedCard ? selectedDayKey : activeDate;
 
   dailyBuzzwordRecords = records || {};
   dayKeys = buildDayKeys(dailyBuzzwordRecords);
@@ -385,12 +391,14 @@ window.addEventListener("beforeunload", () => {
 
 carouselPrev.addEventListener("click", () => {
   if (emblaApi) {
-    emblaApi.scrollNext();
+    userSelectedCard = true;
+    emblaApi.scrollPrev();
   }
 });
 
 carouselNext.addEventListener("click", () => {
   if (emblaApi) {
-    emblaApi.scrollPrev();
+    userSelectedCard = true;
+    emblaApi.scrollNext();
   }
 });

@@ -142,6 +142,12 @@ Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
 
 ## Release notes
 
+### v1.7.1
+
+- Moved the Field Guide card to the left of the active daily card.
+- Recentered the focused carousel card in the viewport.
+- Restored previous/next arrow behavior to match the physical card order.
+
 ### v1.7.0
 
 - Replaced the hard-switch card navigation with an Embla-powered carousel.
