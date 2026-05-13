@@ -23,6 +23,7 @@ GitHub Pages can host the page, but it cannot store a shared count by itself. Th
     "2026-05-13": {
       "phraseId": "forceMultiplier",
       "label": "Force Multiplier",
+      "bingo": true,
       "count": 0
     }
   }
@@ -71,7 +72,7 @@ When `settings/activeDate` is `TODAY`, BuzzBingo resolves it in the browser usin
 }
 ```
 
-These rules are intentionally simple for a friend-shared novelty counter. Public visitors can only increment counts by exactly 1. Admins can add, update, or reset scheduled buzzword records from `/admin.html`. For a more public launch, add Firebase App Check or another abuse-prevention layer.
+These rules are intentionally simple for a friend-shared novelty counter. Public visitors can only increment counts by exactly 1. Admins can add, update, or reset scheduled buzzword records from `/admin.html`. The Bingo page only reads public buzzword records and stores each visitor's card in browser session storage. For a more public launch, add Firebase App Check or another abuse-prevention layer.
 
 When `activeDate` is set to `TODAY`, Realtime Database rules cannot independently calculate the current calendar date. The app only shows the button for today's resolved date, but a determined caller could still increment another dated count directly. That is acceptable for this casual version; use a scheduled server-side update instead if stronger enforcement becomes important.
 
@@ -92,6 +93,14 @@ dailyBuzzwords/{activeDate}
 dailyBuzzwords/{activeDate}/count
 ```
 
+The optional `bingo` flag controls whether a buzzword can appear on randomized Bingo cards:
+
+```text
+dailyBuzzwords/{activeDate}/bingo
+```
+
+Set `bingo` to `false` to exclude a word from Bingo. Missing `bingo` values are treated as included so older buzzword records still work.
+
 Example:
 
 ```json
@@ -103,16 +112,19 @@ Example:
     "2026-05-13": {
       "phraseId": "forceMultiplier",
       "label": "Force Multiplier",
+      "bingo": true,
       "count": 42
     },
     "2026-05-14": {
       "phraseId": "circleBack",
       "label": "Circle Back",
+      "bingo": true,
       "count": 0
     },
     "2026-05-15": {
       "phraseId": "lowHangingFruit",
       "label": "Low-Hanging Fruit",
+      "bingo": false,
       "count": 0
     }
   }
@@ -132,7 +144,7 @@ dailyBuzzwords/YYYY-MM-DD
 settings/activeDate = TODAY
 ```
 
-The phrase ID is generated automatically as a camelCase version of the buzzword label, and the count is saved as `0`. The schedule list shows all past, current, and future buzzwords. Future dates can be edited from the admin page; today and past dates are read-only to avoid overwriting collected counts.
+The phrase ID is generated automatically as a camelCase version of the buzzword label, and the count is saved as `0`. The `BINGO` checkbox controls whether the word can appear on randomized Bingo cards. The schedule list shows all past, current, and future buzzwords. Future dates can be edited from the admin page; today and past dates are read-only to avoid overwriting collected counts.
 
 Manual Firebase edits still work:
 
@@ -149,6 +161,7 @@ Example:
   "2026-05-14": {
     "phraseId": "circleBack",
     "label": "Circle Back",
+    "bingo": true,
     "count": 0
   }
 }
@@ -166,6 +179,12 @@ To reset the active day's total, set `dailyBuzzwords/{activeDate}/count` to `0` 
 
 Firebase Console admin edits are allowed even though public app writes are restricted by rules.
 
+## Bingo cards
+
+Open `/bingo.html` to generate a 5x5 Bingo card from `dailyBuzzwords` records where `bingo` is not `false`. The center square is always `FREE`.
+
+Cards are randomized and stored in `sessionStorage`, so a visitor keeps the same word placement and marked squares for the current browser session. If there are fewer than 24 eligible buzzwords, the app repeats eligible words to fill the card.
+
 ## Versioning
 
 BuzzBingo uses semantic versioning in `version.js`. Asset URLs in `index.html` also include the current version so browsers fetch the newest CSS and scripts after each release.
@@ -177,6 +196,14 @@ BuzzBingo uses semantic versioning in `version.js`. Asset URLs in `index.html` a
 Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
 
 ## Release notes
+
+### v2.0.0
+
+- Added a sticky header with links for Buzz Word of the Day and Bingo.
+- Added `/bingo.html` with a randomized 5x5 buzzword Bingo card.
+- Bingo cards use session storage so each browser session keeps its card layout and marked squares.
+- Added transparent red Bingo markers for clicked squares and a FREE center square.
+- Added an admin `BINGO` checkbox to include or exclude buzzwords from Bingo cards.
 
 ### v1.11.0
 

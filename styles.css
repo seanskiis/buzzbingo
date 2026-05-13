@@ -33,12 +33,20 @@ body {
 }
 
 .app-header {
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 0;
-  z-index: 2;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
   width: 100%;
-  padding: 24px clamp(22px, 4vw, 44px);
+  min-height: 76px;
+  padding: 14px clamp(22px, 4vw, 44px);
+  border-bottom: 1px solid rgba(222, 214, 202, 0.82);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 8px 28px rgba(23, 33, 43, 0.06);
+  backdrop-filter: blur(14px);
 }
 
 .app-logo {
@@ -53,16 +61,48 @@ body {
 
 .app-logo img {
   display: block;
-  width: clamp(178px, 28vw, 268px);
+  width: clamp(148px, 20vw, 218px);
   height: auto;
+}
+
+.app-nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: clamp(14px, 3vw, 34px);
+  flex-wrap: wrap;
+}
+
+.app-nav a {
+  position: relative;
+  color: var(--ink);
+  font-size: 0.96rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.app-nav a::after {
+  position: absolute;
+  right: 0;
+  bottom: -9px;
+  left: 0;
+  height: 3px;
+  border-radius: 999px;
+  background: transparent;
+  content: "";
+}
+
+.app-nav a:hover::after,
+.app-nav a[aria-current="page"]::after {
+  background: var(--accent);
 }
 
 .counter-shell {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  padding: 112px 24px 82px;
+  min-height: calc(100vh - 76px);
+  padding: 38px 24px 82px;
 }
 
 .card-stage {
@@ -369,8 +409,8 @@ h1.phrase-size-xl {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  padding: 112px 24px 92px;
+  min-height: calc(100vh - 76px);
+  padding: 38px 24px 92px;
 }
 
 .admin-panel {
@@ -446,6 +486,27 @@ h1.phrase-size-xl {
   color: var(--muted);
   font-size: 0.88rem;
   font-weight: 800;
+}
+
+.checkbox-label {
+  display: inline-flex !important;
+  width: fit-content;
+  min-height: 42px;
+  align-items: center;
+  grid-template-columns: auto auto;
+  gap: 10px !important;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--ink) !important;
+  cursor: pointer;
+}
+
+.checkbox-label input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
 }
 
 .admin-form input[type="date"],
@@ -604,19 +665,142 @@ h1.phrase-size-xl {
   background: rgba(212, 79, 47, 0.08);
 }
 
+.schedule-status.is-bingo-enabled {
+  color: var(--teal);
+  border-color: rgba(31, 138, 138, 0.24);
+  background: rgba(31, 138, 138, 0.08);
+}
+
+.schedule-status.is-bingo-disabled {
+  color: rgba(91, 101, 114, 0.86);
+  background: rgba(23, 33, 43, 0.05);
+}
+
 .schedule-edit-button {
   min-height: 34px;
   padding: 0 12px;
 }
 
+.bingo-shell {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: calc(100vh - 76px);
+  padding: 42px 18px 96px;
+}
+
+.bingo-panel {
+  width: min(100%, 820px);
+  text-align: center;
+}
+
+.bingo-heading {
+  max-width: 38rem;
+  margin: 0 auto 24px;
+}
+
+.bingo-heading .phrase-kicker {
+  margin-top: 0;
+}
+
+.bingo-card {
+  display: grid;
+  width: min(100%, 680px);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  grid-template-columns: repeat(5, 1fr);
+  border: 2px solid rgba(23, 33, 43, 0.78);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.bingo-square {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  place-items: center;
+  border: 1px solid rgba(23, 33, 43, 0.22);
+  padding: clamp(5px, 1.4vw, 12px);
+  color: var(--ink);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(247, 243, 236, 0.74));
+  cursor: pointer;
+  font: inherit;
+  font-size: clamp(0.68rem, 1.95vw, 1rem);
+  font-weight: 850;
+  line-height: 1.12;
+  text-align: center;
+}
+
+.bingo-square span {
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.bingo-square:hover {
+  background: #fff;
+}
+
+.bingo-square::after {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: min(76%, 84px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(212, 79, 47, 0.42);
+  content: "";
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.72);
+  transition:
+    opacity 130ms ease,
+    transform 130ms ease;
+}
+
+.bingo-square.is-marked::after {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.bingo-square.is-free {
+  color: #fff;
+  background: var(--ink);
+  font-size: clamp(0.86rem, 2.5vw, 1.25rem);
+  letter-spacing: 0.08em;
+}
+
+.bingo-square:disabled {
+  cursor: not-allowed;
+}
+
 @media (max-width: 520px) {
   .app-header {
-    position: static;
-    padding: 20px 20px 0;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 112px;
+    padding: 14px 18px;
+  }
+
+  .app-logo img {
+    width: 156px;
+  }
+
+  .app-nav {
+    justify-content: flex-start;
+    gap: 18px;
+  }
+
+  .app-nav a {
+    font-size: 0.9rem;
   }
 
   .counter-shell {
-    min-height: calc(100vh - 58px);
+    min-height: calc(100vh - 112px);
     padding: 28px 14px 82px;
   }
 
@@ -681,7 +865,7 @@ h1.phrase-size-xl {
   }
 
   .admin-shell {
-    min-height: calc(100vh - 58px);
+    min-height: calc(100vh - 112px);
     padding: 28px 14px 92px;
   }
 
@@ -730,5 +914,14 @@ h1.phrase-size-xl {
 
   .schedule-edit-button {
     flex: 0 0 auto;
+  }
+
+  .bingo-shell {
+    min-height: calc(100vh - 112px);
+    padding: 24px 12px 92px;
+  }
+
+  .bingo-card {
+    width: min(100%, 460px);
   }
 }

@@ -26,6 +26,7 @@ const signOutButton = document.querySelector("#signOutButton");
 const buzzwordForm = document.querySelector("#buzzwordForm");
 const buzzwordDate = document.querySelector("#buzzwordDate");
 const buzzwordLabel = document.querySelector("#buzzwordLabel");
+const bingoEligible = document.querySelector("#bingoEligible");
 const saveButton = document.querySelector("#saveButton");
 const cancelEditButton = document.querySelector("#cancelEditButton");
 const saveStatus = document.querySelector("#saveStatus");
@@ -117,6 +118,7 @@ async function checkAdminAccess(user) {
 function resetForm() {
   buzzwordDate.value = getDateKeyInTimeZone();
   buzzwordLabel.value = "";
+  bingoEligible.checked = true;
   saveButton.querySelector("span:last-child").textContent = "Save buzzword";
   cancelEditButton.hidden = true;
 }
@@ -184,6 +186,7 @@ function renderSchedule(records) {
       const label = record?.label || "Untitled buzzword";
       const phraseId = record?.phraseId || slugify(label);
       const count = typeof record?.count === "number" ? record.count : 0;
+      const isBingoEligible = record?.bingo !== false;
       const canEdit = dateKey > todayKey;
 
       return `
@@ -195,6 +198,9 @@ function renderSchedule(records) {
           </div>
           <div class="schedule-meta">
             <span class="schedule-count">${formatCount(count)}</span>
+            <span class="schedule-status ${isBingoEligible ? "is-bingo-enabled" : "is-bingo-disabled"}">
+              ${isBingoEligible ? "Bingo" : "No bingo"}
+            </span>
             <span class="schedule-status">${status.label}</span>
             ${
               canEdit
@@ -247,6 +253,7 @@ function loadFutureBuzzwordForEdit(dateKey) {
 
   buzzwordDate.value = dateKey;
   buzzwordLabel.value = record.label || "";
+  bingoEligible.checked = record.bingo !== false;
   saveButton.querySelector("span:last-child").textContent = "Update buzzword";
   cancelEditButton.hidden = false;
   setSaveStatus(`Editing ${dateKey}.`);
@@ -282,6 +289,7 @@ async function saveBuzzword(event) {
     const recordRef = ref(database, `dailyBuzzwords/${dateKey}`);
 
     await set(recordRef, {
+      bingo: bingoEligible.checked,
       count: 0,
       label,
       phraseId: id,

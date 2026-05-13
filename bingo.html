@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BuzzBingo Card</title>
+    <meta
+      name="description"
+      content="A randomized corporate buzzword bingo card."
+    >
+    <link rel="icon" href="favicon-16.png?v=2.0.0" type="image/png" sizes="16x16">
+    <link rel="icon" href="favicon-32.png?v=2.0.0" type="image/png" sizes="32x32">
+    <link rel="icon" href="favicon.png?v=2.0.0" type="image/png" sizes="any">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2.0.0">
+    <link rel="stylesheet" href="styles.css?v=2.0.0">
+  </head>
+  <body class="bingo-page">
+    <header class="app-header" aria-label="BuzzBingo">
+      <a class="app-logo" href="./" aria-label="BuzzBingo home">
+        <img src="buzzbingo-header-logo.png?v=2.0.0" alt="BuzzBingo">
+      </a>
+      <nav class="app-nav" aria-label="Primary">
+        <a href="./">Buzz Word of the Day</a>
+        <a href="bingo.html" aria-current="page">Bingo</a>
+      </nav>
+    </header>
+
+    <main class="bingo-shell">
+      <section class="bingo-panel" aria-labelledby="bingoTitle">
+        <div class="bingo-heading">
+          <p class="phrase-kicker">Meeting survival apparatus</p>
+          <h1 id="bingoTitle" class="phrase-size-lg">BuzzBingo</h1>
+          <p id="bingoStatus" class="subtitle" aria-live="polite">
+            Loading your card...
+          </p>
+        </div>
+
+        <section id="bingoCard" class="bingo-card" aria-label="Buzzword bingo card"></section>
+
+        <p class="helper-text">
+          Your card order and daubs stay in this browser session.
+        </p>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <span>
+        Built by
+        <a href="https://github.com/seanskiis" rel="me">Seanskiis</a>
+        &amp; Codex
+      </span>
+      <span class="version-pill">v<span id="appVersion">...</span></span>
+    </footer>
+
+    <script src="firebase-config.js"></script>
+    <script src="version.js?v=2.0.0"></script>
+    <script type="module" src="bingo.js?v=2.0.0"></script>
+  </body>
+</html>
