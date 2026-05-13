@@ -117,6 +117,24 @@ function getCardStatus(dateKey, record) {
   };
 }
 
+function getPhraseSizeClass(label) {
+  const phraseLength = String(label || "").length;
+
+  if (phraseLength > 34) {
+    return "phrase-size-xl";
+  }
+
+  if (phraseLength > 24) {
+    return "phrase-size-lg";
+  }
+
+  if (phraseLength > 14) {
+    return "phrase-size-md";
+  }
+
+  return "phrase-size-sm";
+}
+
 function renderIntroCard() {
   return `
     <div class="label-row">
@@ -125,7 +143,7 @@ function renderIntroCard() {
     </div>
 
     <p class="phrase-kicker">Orientation packet</p>
-    <h1>What is BuzzBingo?</h1>
+    <h1 class="phrase-size-md">What is BuzzBingo?</h1>
     <p class="subtitle">
       A very serious, very scientific button for meetings where buzzwords reproduce in the air ducts.
     </p>
@@ -152,7 +170,7 @@ function renderBuzzwordCard(dateKey, record) {
       </div>
 
       <p class="phrase-kicker">Today's buzzword is</p>
-      <h1>No buzzword set</h1>
+      <h1 class="phrase-size-md">No buzzword set</h1>
       <p class="subtitle">Click the button whenever the buzzword enters the room.</p>
 
       <div class="tally-wrap" aria-live="polite">
@@ -171,7 +189,7 @@ function renderBuzzwordCard(dateKey, record) {
     </div>
 
     <p class="phrase-kicker">${isActive ? "Today's buzzword is" : formatDate(dateKey)}</p>
-    <h1>${escapeHtml(record.label)}</h1>
+    <h1 class="${getPhraseSizeClass(record.label)}">${escapeHtml(record.label)}</h1>
     <p class="subtitle">
       ${isActive ? "Click the button whenever the buzzword enters the room." : "This day's total is locked."}
     </p>

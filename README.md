@@ -142,6 +142,12 @@ Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
 
 ## Release notes
 
+### v1.7.2
+
+- Reworked Embla slide sizing so the focused card centers reliably.
+- Added phrase-size classes so longer buzzwords shrink before wrapping awkwardly.
+- Prevented phrase text from breaking inside words.
+
 ### v1.7.1
 
 - Moved the Field Guide card to the left of the active daily card.
