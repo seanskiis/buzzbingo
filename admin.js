@@ -25,7 +25,6 @@ const signOutButton = document.querySelector("#signOutButton");
 const buzzwordForm = document.querySelector("#buzzwordForm");
 const buzzwordDate = document.querySelector("#buzzwordDate");
 const buzzwordLabel = document.querySelector("#buzzwordLabel");
-const phraseId = document.querySelector("#phraseId");
 const saveButton = document.querySelector("#saveButton");
 const saveStatus = document.querySelector("#saveStatus");
 
@@ -110,7 +109,6 @@ async function checkAdminAccess(user) {
 function resetForm() {
   buzzwordDate.value = getDateKeyInTimeZone();
   buzzwordLabel.value = "";
-  phraseId.value = "";
 }
 
 async function saveBuzzword(event) {
@@ -131,7 +129,7 @@ async function saveBuzzword(event) {
   }
 
   if (!label || !id) {
-    setSaveStatus("Add a buzzword and phrase ID.", true);
+    setSaveStatus("Add a buzzword.", true);
     return;
   }
 
@@ -159,10 +157,6 @@ async function saveBuzzword(event) {
     saveButton.disabled = false;
   }
 }
-
-buzzwordLabel.addEventListener("input", () => {
-  phraseId.value = slugify(buzzwordLabel.value);
-});
 
 signInButton.addEventListener("click", async () => {
   if (!auth) {
