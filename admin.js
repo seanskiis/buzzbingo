@@ -222,7 +222,7 @@ function renderSchedule(records) {
   const todayKey = getDateKeyInTimeZone();
   const rows = Object.entries(records || {})
     .filter(([dateKey]) => validateDateKey(dateKey))
-    .sort(([leftDate], [rightDate]) => leftDate.localeCompare(rightDate));
+    .sort(([leftDate], [rightDate]) => rightDate.localeCompare(leftDate));
 
   dailyBuzzwords = Object.fromEntries(rows);
   scheduleSummary.textContent = rows.length

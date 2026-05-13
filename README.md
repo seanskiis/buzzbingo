@@ -218,6 +218,10 @@ Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
 
 ## Release notes
 
+### v2.3.1
+
+- Reversed the admin buzzword schedule so the latest dates appear first.
+
 ### v2.3.0
 
 - Added a Win Messages admin section for saving Bingo congratulations messages.
