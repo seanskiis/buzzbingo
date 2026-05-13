@@ -729,7 +729,7 @@ h1.phrase-size-xl {
     linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(247, 243, 236, 0.74));
   cursor: pointer;
   font: inherit;
-  font-size: clamp(0.68rem, 1.95vw, 1rem);
+  font-size: clamp(0.68rem, 1.7vw, 1rem);
   font-weight: 850;
   line-height: 1.12;
   text-align: center;
@@ -739,7 +739,22 @@ h1.phrase-size-xl {
   position: relative;
   z-index: 1;
   max-width: 100%;
-  overflow-wrap: anywhere;
+  hyphens: none;
+  overflow-wrap: normal;
+  text-wrap: balance;
+  word-break: normal;
+}
+
+.bingo-square.bingo-word-md {
+  font-size: clamp(0.62rem, 1.45vw, 0.86rem);
+}
+
+.bingo-square.bingo-word-lg {
+  font-size: clamp(0.56rem, 1.25vw, 0.74rem);
+}
+
+.bingo-square.bingo-word-xl {
+  font-size: clamp(0.5rem, 1.05vw, 0.64rem);
 }
 
 .bingo-square:hover {
@@ -797,6 +812,65 @@ h1.phrase-size-xl {
   border-radius: 2px;
   opacity: 0.95;
   animation: confetti-fall 1.8s ease-in forwards;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(23, 33, 43, 0.42);
+  backdrop-filter: blur(8px);
+}
+
+.win-modal {
+  width: min(100%, 460px);
+  padding: clamp(28px, 5vw, 42px);
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.win-modal .phrase-kicker {
+  margin-top: 0;
+}
+
+.win-modal h2 {
+  margin: 0 0 12px;
+  font-size: clamp(2rem, 6vw, 3rem);
+  line-height: 1.05;
+}
+
+.win-modal p {
+  margin: 0 auto 24px;
+  color: var(--muted);
+  font-size: 1rem;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.modal-actions .count-button,
+.modal-link-button {
+  width: auto;
+  min-width: 150px;
+}
+
+.modal-link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
 @keyframes confetti-fall {
@@ -961,5 +1035,10 @@ h1.phrase-size-xl {
 
   .bingo-card {
     width: min(100%, 460px);
+  }
+
+  .modal-actions .count-button,
+  .modal-link-button {
+    width: 100%;
   }
 }

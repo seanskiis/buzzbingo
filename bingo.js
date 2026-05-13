@@ -27,8 +27,12 @@ const CONFETTI_COLORS = ["#d44f2f", "#f0b429", "#1f8a8a", "#17212b", "#ffffff"];
 const appVersion = document.querySelector("#appVersion");
 const bingoCard = document.querySelector("#bingoCard");
 const bingoStatus = document.querySelector("#bingoStatus");
+const winModal = document.querySelector("#winModal");
+const playAgainButton = document.querySelector("#playAgainButton");
 const config = window.BUZZBINGO_FIREBASE_CONFIG;
 
+let latestRecords = {};
+let previouslyFocusedElement = null;
 let unsubscribeBuzzwords = null;
 
 appVersion.textContent = window.BUZZBINGO_VERSION || "dev";
@@ -78,6 +82,27 @@ function normalizeWordRecords(records) {
 
 function getSourceFingerprint(words) {
   return words.map((word) => `${word.id}:${word.label}`).join("|");
+}
+
+function getSquareSizeClass(label) {
+  const normalizedLabel = String(label || "");
+  const longestWordLength = normalizedLabel
+    .split(/\s+/)
+    .reduce((longestLength, word) => Math.max(longestLength, word.length), 0);
+
+  if (normalizedLabel.length > 34 || longestWordLength > 16) {
+    return "bingo-word-xl";
+  }
+
+  if (normalizedLabel.length > 24 || longestWordLength > 13) {
+    return "bingo-word-lg";
+  }
+
+  if (normalizedLabel.length > 16 || longestWordLength > 10) {
+    return "bingo-word-md";
+  }
+
+  return "bingo-word-sm";
 }
 
 function shuffle(values) {
@@ -196,6 +221,7 @@ function renderEmptyCard(message) {
 }
 
 function renderCard(records) {
+  latestRecords = records || {};
   const words = normalizeWordRecords(records);
 
   if (!words.length) {
@@ -213,10 +239,11 @@ function renderCard(records) {
       const label = square?.label || "Buzzword";
       const isMarked = markedSet.has(index);
       const showMarker = isMarked && !square?.isFree;
+      const sizeClass = square?.isFree ? "" : getSquareSizeClass(label);
 
       return `
         <button
-          class="bingo-square ${square?.isFree ? "is-free" : ""} ${showMarker ? "is-marked" : ""}"
+          class="bingo-square ${square?.isFree ? "is-free" : ""} ${showMarker ? "is-marked" : ""} ${sizeClass}"
           type="button"
           data-square-index="${index}"
           aria-pressed="${isMarked ? "true" : "false"}"
@@ -258,6 +285,24 @@ function launchConfetti() {
   window.setTimeout(() => confettiLayer.remove(), 2600);
 }
 
+function showWinModal() {
+  if (!winModal.hidden) {
+    return;
+  }
+
+  previouslyFocusedElement = document.activeElement;
+  winModal.hidden = false;
+  playAgainButton.focus();
+}
+
+function hideWinModal() {
+  winModal.hidden = true;
+
+  if (previouslyFocusedElement && typeof previouslyFocusedElement.focus === "function") {
+    previouslyFocusedElement.focus();
+  }
+}
+
 function updateBingoCelebration(storedCard, markedSet) {
   const completedLines = getCompletedLineKeys(markedSet);
   const celebratedSet = new Set(
@@ -268,6 +313,7 @@ function updateBingoCelebration(storedCard, markedSet) {
   if (newCompletedLines.length) {
     completedLines.forEach((lineKey) => celebratedSet.add(lineKey));
     launchConfetti();
+    showWinModal();
     bingoStatus.textContent = "BINGO. Corporate synergy has been detected.";
   } else if (completedLines.length) {
     bingoStatus.textContent = "BINGO is still active. Maintain unnecessary urgency.";
@@ -338,6 +384,29 @@ bingoCard.addEventListener("click", (event) => {
 
   if (squareButton) {
     toggleSquare(squareButton);
+  }
+});
+
+playAgainButton.addEventListener("click", () => {
+  try {
+    sessionStorage.removeItem(BINGO_SESSION_KEY);
+  } catch {
+    // If session storage is unavailable, rerendering still gives the user a fresh in-memory card.
+  }
+
+  hideWinModal();
+  renderCard(latestRecords);
+});
+
+winModal.addEventListener("click", (event) => {
+  if (event.target === winModal) {
+    hideWinModal();
+  }
+});
+
+window.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !winModal.hidden) {
+    hideWinModal();
   }
 });
 

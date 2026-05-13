@@ -197,6 +197,12 @@ Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
 
 ## Release notes
 
+### v2.1.0
+
+- Improved Bingo square text sizing so longer phrases fit without awkward word breaks.
+- Added a win modal when a user completes a new Bingo line.
+- Added Play again to reshuffle a fresh card and a homepage exit button.
+
 ### v2.0.1
 
 - Added Bingo detection for rows, columns, and diagonals.
