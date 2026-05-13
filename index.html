@@ -8,16 +8,16 @@
       name="description"
       content="A shared board for tracking corporate buzzwords in the wild."
     >
-    <link rel="icon" href="favicon-16.png?v=1.3.0" type="image/png" sizes="16x16">
-    <link rel="icon" href="favicon-32.png?v=1.3.0" type="image/png" sizes="32x32">
-    <link rel="icon" href="favicon.png?v=1.3.0" type="image/png" sizes="any">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=1.3.0">
-    <link rel="stylesheet" href="styles.css?v=1.3.0">
+    <link rel="icon" href="favicon-16.png?v=1.4.0" type="image/png" sizes="16x16">
+    <link rel="icon" href="favicon-32.png?v=1.4.0" type="image/png" sizes="32x32">
+    <link rel="icon" href="favicon.png?v=1.4.0" type="image/png" sizes="any">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=1.4.0">
+    <link rel="stylesheet" href="styles.css?v=1.4.0">
   </head>
   <body>
     <header class="app-header" aria-label="BuzzBingo">
       <a class="app-logo" href="./" aria-label="BuzzBingo home">
-        <img src="buzzbingo-header-logo.png?v=1.3.0" alt="BuzzBingo">
+        <img src="buzzbingo-header-logo.png?v=1.4.0" alt="BuzzBingo">
       </a>
     </header>
 
@@ -51,11 +51,17 @@
 
       <section class="history-panel" aria-labelledby="historyTitle">
         <div class="section-heading">
-          <p class="history-kicker">Archive</p>
-          <h2 id="historyTitle">Previous buzzwords</h2>
+          <div>
+            <p class="history-kicker">Daily cards</p>
+            <h2 id="historyTitle">Buzzword carousel</h2>
+          </div>
+          <div class="carousel-controls" aria-label="Carousel controls">
+            <button id="carouselPrev" class="carousel-btn" type="button" aria-label="Previous day">‹</button>
+            <button id="carouselNext" class="carousel-btn" type="button" aria-label="Next day">›</button>
+          </div>
         </div>
-        <div id="historyList" class="history-list" aria-live="polite">
-          <p class="history-empty">Previous daily totals will appear here.</p>
+        <div id="dayCarousel" class="day-carousel" aria-live="polite" tabindex="0">
+          <p class="history-empty">Daily totals will appear here.</p>
         </div>
       </section>
     </main>
@@ -70,7 +76,7 @@
     </footer>
 
     <script src="firebase-config.js"></script>
-    <script src="version.js?v=1.3.0"></script>
-    <script type="module" src="app.js?v=1.3.0"></script>
+    <script src="version.js?v=1.4.0"></script>
+    <script type="module" src="app.js?v=1.4.0"></script>
   </body>
 </html>

@@ -84,7 +84,7 @@ body {
 
 .section-heading {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 18px;
   margin-bottom: 16px;
@@ -105,40 +105,108 @@ body {
   line-height: 1.2;
 }
 
-.history-list {
-  display: grid;
-  gap: 10px;
+.carousel-controls {
+  display: flex;
+  gap: 8px;
 }
 
-.history-item {
+.carousel-btn {
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid rgba(91, 101, 114, 0.2);
+  border-radius: 50%;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+  font: inherit;
+  font-size: 1.5rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.carousel-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
+}
+
+.day-carousel {
+  display: flex;
+  gap: 14px;
+  margin: 0 -8px;
+  padding: 2px 8px 10px;
+  overflow-x: auto;
+  scroll-padding: 8px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+}
+
+.day-card {
+  display: grid;
+  flex: 0 0 min(78%, 260px);
+  min-height: 166px;
+  align-content: space-between;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid rgba(91, 101, 114, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  scroll-snap-align: start;
+}
+
+.day-card.is-active {
+  border-color: rgba(31, 138, 138, 0.42);
+  box-shadow: inset 0 0 0 1px rgba(31, 138, 138, 0.18);
+}
+
+.day-card-topline {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 12px 0;
-  border-top: 1px solid rgba(91, 101, 114, 0.18);
+  gap: 12px;
 }
 
-.history-item div {
-  display: grid;
-  gap: 3px;
-}
-
-.history-item time,
+.day-card time,
 .history-empty {
   color: var(--muted);
   font-size: 0.84rem;
   font-weight: 650;
 }
 
-.history-item strong {
-  font-size: 1rem;
+.current-badge {
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: var(--teal);
+  background: rgba(31, 138, 138, 0.11);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
-.history-item span {
+.day-card strong {
+  max-width: 11rem;
+  font-size: 1.35rem;
+  line-height: 1.12;
+}
+
+.day-card-total {
+  display: grid;
+  gap: 2px;
+}
+
+.day-card-total span {
   font-variant-numeric: tabular-nums;
-  font-size: 1.3rem;
+  font-size: 2.3rem;
   font-weight: 900;
+  line-height: 0.9;
+}
+
+.day-card-total small {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .history-empty {
@@ -334,6 +402,10 @@ h1 {
 
   .history-panel {
     padding: 20px;
+  }
+
+  .day-card {
+    flex-basis: 84%;
   }
 
   h1 {

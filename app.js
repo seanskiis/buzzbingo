@@ -13,7 +13,9 @@ const connectionStatus = document.querySelector("#connectionStatus");
 const panel = document.querySelector(".counter-panel");
 const phraseLabel = document.querySelector("#phraseLabel");
 const appVersion = document.querySelector("#appVersion");
-const historyList = document.querySelector("#historyList");
+const dayCarousel = document.querySelector("#dayCarousel");
+const carouselPrev = document.querySelector("#carouselPrev");
+const carouselNext = document.querySelector("#carouselNext");
 
 const config = window.BUZZBINGO_FIREBASE_CONFIG;
 
@@ -79,6 +81,13 @@ function disableCounter(message) {
   setState("error", message);
 }
 
+function updateCarouselControls() {
+  const canScroll = dayCarousel.scrollWidth > dayCarousel.clientWidth + 2;
+  carouselPrev.disabled = !canScroll || dayCarousel.scrollLeft <= 2;
+  carouselNext.disabled =
+    !canScroll || dayCarousel.scrollLeft + dayCarousel.clientWidth >= dayCarousel.scrollWidth - 2;
+}
+
 function renderActiveBuzzword(dateKey, record) {
   if (!record || !record.label) {
     phraseLabel.textContent = "No buzzword set";
@@ -97,32 +106,42 @@ function renderActiveBuzzword(dateKey, record) {
 function renderHistory(records) {
   dailyBuzzwordRecords = records || {};
 
-  const previousRecords = Object.entries(dailyBuzzwordRecords)
-    .filter(([dateKey]) => dateKey !== activeDate)
+  const dayRecords = Object.entries(dailyBuzzwordRecords)
     .sort(([leftDate], [rightDate]) => rightDate.localeCompare(leftDate))
-    .slice(0, 7);
+    .slice(0, 14);
 
-  if (!previousRecords.length) {
-    historyList.innerHTML = '<p class="history-empty">Previous daily totals will appear here.</p>';
+  if (!dayRecords.length) {
+    dayCarousel.innerHTML = '<p class="history-empty">Daily totals will appear here.</p>';
+    updateCarouselControls();
     return;
   }
 
-  historyList.innerHTML = previousRecords
+  dayCarousel.innerHTML = dayRecords
     .map(([dateKey, record]) => {
       const label = record?.label || "Untitled buzzword";
       const count = formatCount(typeof record?.count === "number" ? record.count : 0);
+      const isActive = dateKey === activeDate;
 
       return `
-        <article class="history-item">
-          <div>
+        <article class="day-card${isActive ? " is-active" : ""}" aria-label="${isActive ? "Current day" : "Previous day"} ${formatDate(dateKey)}">
+          <div class="day-card-topline">
             <time datetime="${dateKey}">${formatDate(dateKey)}</time>
-            <strong>${escapeHtml(label)}</strong>
+            ${isActive ? '<span class="current-badge">Today</span>' : ""}
           </div>
-          <span>${count}</span>
+          <strong>${escapeHtml(label)}</strong>
+          <div class="day-card-total">
+            <span>${count}</span>
+            <small>total heard</small>
+          </div>
         </article>
       `;
     })
     .join("");
+
+  requestAnimationFrame(() => {
+    dayCarousel.scrollLeft = 0;
+    updateCarouselControls();
+  });
 }
 
 if (!hasFirebaseConfig(config)) {
@@ -169,7 +188,7 @@ if (!hasFirebaseConfig(config)) {
       ref(database, "dailyBuzzwords"),
       (snapshot) => renderHistory(snapshot.val()),
       (error) => {
-        historyList.innerHTML = `<p class="history-empty">Firebase history read failed: ${error.message}</p>`;
+        dayCarousel.innerHTML = `<p class="history-empty">Firebase history read failed: ${error.message}</p>`;
       }
     );
 
@@ -204,3 +223,14 @@ window.addEventListener("beforeunload", () => {
     }
   });
 });
+
+carouselPrev.addEventListener("click", () => {
+  dayCarousel.scrollBy({ left: -dayCarousel.clientWidth * 0.85, behavior: "smooth" });
+});
+
+carouselNext.addEventListener("click", () => {
+  dayCarousel.scrollBy({ left: dayCarousel.clientWidth * 0.85, behavior: "smooth" });
+});
+
+dayCarousel.addEventListener("scroll", updateCarouselControls);
+window.addEventListener("resize", updateCarouselControls);

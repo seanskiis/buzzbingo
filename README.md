@@ -142,6 +142,12 @@ Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
 
 ## Release notes
 
+### v1.4.0
+
+- Replaced the archive list with a daily buzzword carousel.
+- Added current-day and previous-day cards with date, phrase, and total count.
+- Added carousel navigation controls for browsing daily cards.
+
 ### v1.3.0
 
 - Moved the tally data model to daily buzzword records.
