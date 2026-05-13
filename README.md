@@ -83,7 +83,7 @@ Firebase Console admin edits are allowed even though public app writes are restr
 
 ## Versioning
 
-BuzzBingo uses semantic versioning in `version.js`.
+BuzzBingo uses semantic versioning in `version.js`. Asset URLs in `index.html` also include the current version so browsers fetch the newest CSS and scripts after each release.
 
 - Patch version: copy, styling, or documentation changes.
 - Minor version: new visible features or data-shape changes that remain backward compatible.

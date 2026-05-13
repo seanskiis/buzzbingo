@@ -48,7 +48,7 @@ body {
   display: grid;
   min-height: 100vh;
   place-items: center;
-  padding: 112px 24px 42px;
+  padding: 112px 24px 76px;
 }
 
 .counter-panel {
@@ -203,9 +203,12 @@ h1 {
   align-items: center;
   gap: 10px;
   padding: 18px clamp(18px, 4vw, 36px);
+  border-top-right-radius: 8px;
+  background: rgba(247, 243, 236, 0.72);
   color: var(--muted);
   font-size: 0.86rem;
   font-weight: 650;
+  backdrop-filter: blur(12px);
 }
 
 .app-footer a {
@@ -239,7 +242,7 @@ h1 {
 
   .counter-shell {
     min-height: calc(100vh - 58px);
-    padding: 28px 14px 22px;
+    padding: 28px 14px 82px;
   }
 
   .counter-panel {
@@ -256,10 +259,11 @@ h1 {
   }
 
   .app-footer {
-    position: static;
     justify-content: center;
     flex-wrap: wrap;
-    padding: 0 18px 22px;
+    width: 100%;
+    padding: 12px 18px;
+    border-top-right-radius: 0;
     text-align: center;
   }
 }
