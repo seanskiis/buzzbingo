@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BuzzBingo Admin</title>
+    <meta
+      name="description"
+      content="Admin utility for scheduling BuzzBingo buzzwords."
+    >
+    <link rel="icon" href="favicon-16.png?v=1.9.0" type="image/png" sizes="16x16">
+    <link rel="icon" href="favicon-32.png?v=1.9.0" type="image/png" sizes="32x32">
+    <link rel="icon" href="favicon.png?v=1.9.0" type="image/png" sizes="any">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=1.9.0">
+    <link rel="stylesheet" href="styles.css?v=1.9.0">
+  </head>
+  <body class="admin-page">
+    <header class="app-header" aria-label="BuzzBingo">
+      <a class="app-logo" href="./" aria-label="BuzzBingo home">
+        <img src="buzzbingo-header-logo.png?v=1.9.0" alt="BuzzBingo">
+      </a>
+    </header>
+
+    <main class="admin-shell">
+      <section class="admin-panel" aria-labelledby="adminTitle">
+        <div class="admin-heading">
+          <p class="phrase-kicker">Admin utility</p>
+          <h1 id="adminTitle" class="phrase-size-lg">Schedule a Buzzword</h1>
+          <p class="subtitle">
+            Add or update a dated buzzword without wrestling the raw Firebase JSON octopus.
+          </p>
+        </div>
+
+        <section class="admin-auth" aria-live="polite">
+          <div>
+            <strong id="authStatus">Not signed in</strong>
+            <p id="authDetail">Sign in with Google to check admin access.</p>
+          </div>
+          <div class="admin-auth-actions">
+            <button id="signInButton" class="secondary-button" type="button">Sign in</button>
+            <button id="signOutButton" class="secondary-button" type="button" hidden>Sign out</button>
+          </div>
+        </section>
+
+        <form id="buzzwordForm" class="admin-form" hidden>
+          <label>
+            Date
+            <input id="buzzwordDate" name="buzzwordDate" type="date" required>
+          </label>
+
+          <label>
+            Buzzword
+            <input
+              id="buzzwordLabel"
+              name="buzzwordLabel"
+              type="text"
+              autocomplete="off"
+              maxlength="80"
+              placeholder="Agentic Workflow"
+              required
+            >
+          </label>
+
+          <label>
+            Phrase ID
+            <input
+              id="phraseId"
+              name="phraseId"
+              type="text"
+              autocomplete="off"
+              maxlength="80"
+              readonly
+              required
+            >
+          </label>
+
+          <button id="saveButton" class="count-button admin-save-button" type="submit">
+            <span class="button-icon" aria-hidden="true">+</span>
+            <span>Save buzzword</span>
+          </button>
+
+          <p id="saveStatus" class="helper-text" aria-live="polite"></p>
+        </form>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <span>
+        Built by
+        <a href="https://github.com/seanskiis" rel="me">Seanskiis</a>
+        &amp; Codex
+      </span>
+      <span class="version-pill">v<span id="appVersion">...</span></span>
+    </footer>
+
+    <script src="firebase-config.js"></script>
+    <script src="version.js?v=1.9.0"></script>
+    <script type="module" src="admin.js?v=1.9.0"></script>
+  </body>
+</html>

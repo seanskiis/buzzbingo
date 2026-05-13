@@ -31,23 +31,39 @@ GitHub Pages can host the page, but it cannot store a shared count by itself. Th
 
 When `settings/activeDate` is `TODAY`, BuzzBingo resolves it in the browser using the `America/Chicago` timezone and loads the matching `dailyBuzzwords/YYYY-MM-DD` record. Future dated records can be added ahead of time; they stay hidden until their date becomes active. Open browser tabs check once per minute and roll forward after the Central Time date changes.
 
-6. In Realtime Database rules, use this for a casual public counter:
+6. Enable Firebase Authentication > Sign-in method > Google.
+7. Sign in once at `/admin.html`, copy the UID shown on the page, and add it to Realtime Database:
+
+```json
+{
+  "admins": {
+    "YOUR_FIREBASE_UID": true
+  }
+}
+```
+
+8. In Realtime Database rules, use this for a casual public counter with an admin scheduler:
 
 ```json
 {
   "rules": {
+    "admins": {
+      ".read": false,
+      ".write": false
+    },
     "settings": {
       ".read": true,
-      ".write": false
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() == true"
     },
     "dailyBuzzwords": {
       ".read": true,
       "$date": {
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() == true",
         "count": {
-          ".write": "(root.child('settings/activeDate').val() == $date || root.child('settings/activeDate').val() == 'TODAY') && newData.isNumber() && ((!data.exists() && newData.val() == 1) || (data.isNumber() && newData.val() == data.val() + 1))"
+          ".write": "(newData.isNumber() && ((!data.exists() && newData.val() == 1) || (data.isNumber() && newData.val() == data.val() + 1))) || (auth != null && root.child('admins').child(auth.uid).val() == true)"
         },
         "$other": {
-          ".write": false
+          ".write": "auth != null && root.child('admins').child(auth.uid).val() == true"
         }
       }
     }
@@ -55,7 +71,7 @@ When `settings/activeDate` is `TODAY`, BuzzBingo resolves it in the browser usin
 }
 ```
 
-These rules are intentionally simple for a friend-shared novelty counter. For a more public launch, add Firebase App Check or another abuse-prevention layer.
+These rules are intentionally simple for a friend-shared novelty counter. Public visitors can only increment counts by exactly 1. Admins can add, update, or reset scheduled buzzword records from `/admin.html`. For a more public launch, add Firebase App Check or another abuse-prevention layer.
 
 When `activeDate` is set to `TODAY`, Realtime Database rules cannot independently calculate the current calendar date. The app only shows the button for today's resolved date, but a determined caller could still increment another dated count directly. That is acceptable for this casual version; use a scheduled server-side update instead if stronger enforcement becomes important.
 
@@ -107,9 +123,18 @@ Previous dates remain in `dailyBuzzwords`, so the app can show archived totals. 
 
 ## Daily admin workflow
 
-Do not add public admin controls until the app has real admin authentication. In the current no-login GitHub Pages version, anyone who can press a public admin button could change the active word or clear totals.
+Use `/admin.html` to add or update scheduled buzzwords without editing raw JSON. The admin page requires Google sign-in and a matching UID under `admins/{uid}` in Firebase.
 
-For now, change the daily buzzword directly in Firebase:
+The admin utility writes:
+
+```text
+dailyBuzzwords/YYYY-MM-DD
+settings/activeDate = TODAY
+```
+
+The phrase ID is generated automatically as a camelCase version of the buzzword label, and the count is saved as `0`. Saving over an existing date resets that date's count to `0`.
+
+Manual Firebase edits still work:
 
 1. Open Firebase Console.
 2. Go to Realtime Database > Data.
@@ -152,6 +177,13 @@ BuzzBingo uses semantic versioning in `version.js`. Asset URLs in `index.html` a
 Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
 
 ## Release notes
+
+### v1.9.0
+
+- Added `/admin.html` for Google-authenticated buzzword scheduling.
+- Added automatic camelCase phrase ID generation.
+- Admin saves dated buzzwords with count `0` and keeps `settings.activeDate` set to `TODAY`.
+- Updated Firebase setup and rules documentation for admin writes.
 
 ### v1.8.0
 

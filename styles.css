@@ -15,6 +15,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
   min-height: 100vh;
   margin: 0;
@@ -361,6 +365,118 @@ h1.phrase-size-xl {
   font-size: 0.76rem;
 }
 
+.admin-shell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 112px 24px 92px;
+}
+
+.admin-panel {
+  width: min(100%, 720px);
+  padding: clamp(28px, 5vw, 48px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
+}
+
+.admin-heading {
+  max-width: 34rem;
+  margin: 0 auto 26px;
+  text-align: center;
+}
+
+.admin-auth {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 0 0 26px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(247, 243, 236, 0.58);
+}
+
+.admin-auth p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.94rem;
+  line-height: 1.45;
+}
+
+.admin-auth-actions {
+  display: flex;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.secondary-button {
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.78);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+}
+
+.secondary-button:hover {
+  border-color: rgba(23, 33, 43, 0.26);
+}
+
+.secondary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.admin-form {
+  display: grid;
+  gap: 18px;
+}
+
+.admin-form label {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.admin-form input[type="date"],
+.admin-form input[type="number"],
+.admin-form input[type="text"] {
+  min-height: 48px;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.86);
+  font: inherit;
+  font-size: 1rem;
+}
+
+.admin-form input:focus {
+  outline: 3px solid rgba(31, 138, 138, 0.16);
+  border-color: rgba(31, 138, 138, 0.55);
+}
+
+.admin-save-button {
+  width: min(100%, 360px);
+  margin: 8px auto 0;
+}
+
+.helper-text.has-message-error {
+  color: var(--accent-dark);
+  font-weight: 800;
+}
+
 @media (max-width: 520px) {
   .app-header {
     position: static;
@@ -430,5 +546,27 @@ h1.phrase-size-xl {
     padding: 12px 18px;
     border-top-right-radius: 0;
     text-align: center;
+  }
+
+  .admin-shell {
+    min-height: calc(100vh - 58px);
+    padding: 28px 14px 92px;
+  }
+
+  .admin-panel {
+    padding: 26px 18px;
+  }
+
+  .admin-auth {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-auth-actions {
+    width: 100%;
+  }
+
+  .secondary-button {
+    flex: 1;
   }
 }
