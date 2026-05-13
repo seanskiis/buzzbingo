@@ -1,6 +1,6 @@
 # BuzzBingo
 
-A tiny GitHub Pages-friendly web page for tracking corporate buzzwords in the wild. The first version keeps a shared cumulative count of every time someone hears "force multiplier," with room to grow into a fuller buzzword bingo board later.
+A tiny GitHub Pages-friendly web page for tracking corporate buzzwords in the wild. BuzzBingo shows one active buzzword at a time, keeps a shared daily tally, and preserves previous daily totals.
 
 ## Why Firebase is included
 
@@ -12,13 +12,21 @@ GitHub Pages can host the page, but it cannot store a shared count by itself. Th
 2. Add a web app in the Firebase project settings.
 3. Create a Realtime Database.
 4. Copy the web app config into `firebase-config.js`.
-5. Keep the first phrase configured like this:
+5. Add starter data in Realtime Database:
 
-```js
-window.BUZZBINGO_CURRENT_PHRASE = {
-  id: "forceMultiplier",
-  label: "Force Multiplier",
-};
+```json
+{
+  "settings": {
+    "activeDate": "2026-05-13"
+  },
+  "dailyBuzzwords": {
+    "2026-05-13": {
+      "phraseId": "forceMultiplier",
+      "label": "Force Multiplier",
+      "count": 0
+    }
+  }
+}
 ```
 
 6. In Realtime Database rules, use this for a casual public counter:
@@ -26,11 +34,18 @@ window.BUZZBINGO_CURRENT_PHRASE = {
 ```json
 {
   "rules": {
-    "buzzwords": {
-      "$phraseId": {
-        ".read": true,
+    "settings": {
+      ".read": true,
+      ".write": false
+    },
+    "dailyBuzzwords": {
+      ".read": true,
+      "$date": {
         "count": {
-          ".write": "newData.isNumber() && ((!data.exists() && newData.val() == 1) || (data.isNumber() && newData.val() == data.val() + 1))"
+          ".write": "root.child('settings/activeDate').val() == $date && newData.isNumber() && ((!data.exists() && newData.val() == 1) || (data.isNumber() && newData.val() == data.val() + 1))"
+        },
+        "$other": {
+          ".write": false
         }
       }
     }
@@ -42,42 +57,76 @@ These rules are intentionally simple for a friend-shared novelty counter. For a 
 
 ## Database shape
 
-The current page writes to:
+The current page reads the active date from:
 
 ```text
-buzzwords/forceMultiplier/count
+settings/activeDate
 ```
 
-That sets up this structure as more phrases are added:
+It then reads and writes the matching daily buzzword:
+
+```text
+dailyBuzzwords/{activeDate}
+dailyBuzzwords/{activeDate}/count
+```
+
+Example:
 
 ```json
 {
-  "buzzwords": {
-    "forceMultiplier": {
+  "settings": {
+    "activeDate": "2026-05-14"
+  },
+  "dailyBuzzwords": {
+    "2026-05-13": {
+      "phraseId": "forceMultiplier",
+      "label": "Force Multiplier",
       "count": 42
     },
-    "circleBack": {
-      "count": 17
-    },
-    "lowHangingFruit": {
-      "count": 9
+    "2026-05-14": {
+      "phraseId": "circleBack",
+      "label": "Circle Back",
+      "count": 0
     }
   }
 }
 ```
 
-Future versions can add labels, board layout, categories, or per-session bingo cards alongside each phrase without moving the existing counts.
+Previous dates remain in `dailyBuzzwords`, so the app can show archived totals.
 
-## Admin reset
+## Daily admin workflow
 
-Do not add a public reset button until the app has real admin authentication. In the current no-login GitHub Pages version, anyone who can press a public reset button could clear the tally.
+Do not add public admin controls until the app has real admin authentication. In the current no-login GitHub Pages version, anyone who can press a public admin button could change the active word or clear totals.
 
-For now, reset totals directly in Firebase:
+For now, change the daily buzzword directly in Firebase:
 
 1. Open Firebase Console.
 2. Go to Realtime Database > Data.
-3. Open `buzzwords/forceMultiplier/count`.
-4. Set the value to `0`, or delete the `count` value if you want the next click to recreate it as `1`.
+3. Add a record under `dailyBuzzwords/YYYY-MM-DD`.
+4. Set `phraseId`, `label`, and `count`.
+5. Update `settings/activeDate` to the same date.
+
+Example:
+
+```json
+"dailyBuzzwords": {
+  "2026-05-14": {
+    "phraseId": "circleBack",
+    "label": "Circle Back",
+    "count": 0
+  }
+}
+```
+
+Then:
+
+```json
+"settings": {
+  "activeDate": "2026-05-14"
+}
+```
+
+To reset the active day's total, set `dailyBuzzwords/{activeDate}/count` to `0` in Firebase Console.
 
 Firebase Console admin edits are allowed even though public app writes are restricted by rules.
 
@@ -92,6 +141,13 @@ BuzzBingo uses semantic versioning in `version.js`. Asset URLs in `index.html` a
 Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
 
 ## Release notes
+
+### v1.3.0
+
+- Moved the tally data model to daily buzzword records.
+- Added support for changing the active buzzword through Firebase data.
+- Added previous daily totals below the main counter.
+- Updated Firebase setup, rules, and admin workflow documentation.
 
 ### v1.2.3
 

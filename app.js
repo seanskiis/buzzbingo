@@ -13,17 +13,17 @@ const connectionStatus = document.querySelector("#connectionStatus");
 const panel = document.querySelector(".counter-panel");
 const phraseLabel = document.querySelector("#phraseLabel");
 const appVersion = document.querySelector("#appVersion");
+const historyList = document.querySelector("#historyList");
 
 const config = window.BUZZBINGO_FIREBASE_CONFIG;
-const currentPhrase = window.BUZZBINGO_CURRENT_PHRASE || {
-  id: "forceMultiplier",
-  label: "Force Multiplier",
-};
-const counterPath = `buzzwords/${currentPhrase.id}/count`;
 
-let unsubscribe = null;
+let activeDate = null;
+let activeCounterRef = null;
+let unsubscribeActiveDate = null;
+let unsubscribeActiveBuzzword = null;
+let unsubscribeHistory = null;
+let dailyBuzzwordRecords = {};
 
-phraseLabel.textContent = currentPhrase.label;
 appVersion.textContent = window.BUZZBINGO_VERSION || "dev";
 
 function setState(state, message) {
@@ -35,6 +35,32 @@ function setState(state, message) {
 
 function formatCount(value) {
   return new Intl.NumberFormat().format(Number.isFinite(value) ? value : 0);
+}
+
+function formatDate(dateKey) {
+  const [year, month, day] = String(dateKey).split("-").map(Number);
+
+  if (!year || !month || !day) {
+    return dateKey;
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(year, month - 1, day));
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, (character) => {
+    return {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;",
+    }[character];
+  });
 }
 
 function hasFirebaseConfig(firebaseConfig) {
@@ -53,33 +79,111 @@ function disableCounter(message) {
   setState("error", message);
 }
 
+function renderActiveBuzzword(dateKey, record) {
+  if (!record || !record.label) {
+    phraseLabel.textContent = "No buzzword set";
+    countDisplay.textContent = "0";
+    activeCounterRef = null;
+    disableCounter(`Add dailyBuzzwords/${dateKey} in Firebase.`);
+    return;
+  }
+
+  phraseLabel.textContent = record.label;
+  countDisplay.textContent = formatCount(typeof record.count === "number" ? record.count : 0);
+  countButton.disabled = false;
+  setState("live", `Tracking ${formatDate(dateKey)}.`);
+}
+
+function renderHistory(records) {
+  dailyBuzzwordRecords = records || {};
+
+  const previousRecords = Object.entries(dailyBuzzwordRecords)
+    .filter(([dateKey]) => dateKey !== activeDate)
+    .sort(([leftDate], [rightDate]) => rightDate.localeCompare(leftDate))
+    .slice(0, 7);
+
+  if (!previousRecords.length) {
+    historyList.innerHTML = '<p class="history-empty">Previous daily totals will appear here.</p>';
+    return;
+  }
+
+  historyList.innerHTML = previousRecords
+    .map(([dateKey, record]) => {
+      const label = record?.label || "Untitled buzzword";
+      const count = formatCount(typeof record?.count === "number" ? record.count : 0);
+
+      return `
+        <article class="history-item">
+          <div>
+            <time datetime="${dateKey}">${formatDate(dateKey)}</time>
+            <strong>${escapeHtml(label)}</strong>
+          </div>
+          <span>${count}</span>
+        </article>
+      `;
+    })
+    .join("");
+}
+
 if (!hasFirebaseConfig(config)) {
   disableCounter("Add your Firebase settings to firebase-config.js before publishing.");
 } else {
   try {
     const app = initializeApp(config);
     const database = getDatabase(app);
-    const counterRef = ref(database, counterPath);
 
-    unsubscribe = onValue(
-      counterRef,
+    unsubscribeActiveDate = onValue(
+      ref(database, "settings/activeDate"),
       (snapshot) => {
-        const value = snapshot.val();
-        countDisplay.textContent = formatCount(typeof value === "number" ? value : 0);
-        countButton.disabled = false;
-        setState("live", "Everyone sees the same total.");
+        const nextActiveDate = snapshot.val();
+
+        if (!nextActiveDate) {
+          phraseLabel.textContent = "No buzzword set";
+          activeCounterRef = null;
+          disableCounter("Set settings/activeDate in Firebase.");
+          return;
+        }
+
+        activeDate = nextActiveDate;
+        renderHistory(dailyBuzzwordRecords);
+        activeCounterRef = ref(database, `dailyBuzzwords/${activeDate}/count`);
+        countButton.disabled = true;
+        setState("loading", "Loading today's buzzword...");
+
+        if (typeof unsubscribeActiveBuzzword === "function") {
+          unsubscribeActiveBuzzword();
+        }
+
+        unsubscribeActiveBuzzword = onValue(
+          ref(database, `dailyBuzzwords/${activeDate}`),
+          (activeSnapshot) => renderActiveBuzzword(activeDate, activeSnapshot.val()),
+          (error) => disableCounter(`Firebase read failed: ${error.message}`)
+        );
       },
       (error) => {
         disableCounter(`Firebase read failed: ${error.message}`);
       }
     );
 
+    unsubscribeHistory = onValue(
+      ref(database, "dailyBuzzwords"),
+      (snapshot) => renderHistory(snapshot.val()),
+      (error) => {
+        historyList.innerHTML = `<p class="history-empty">Firebase history read failed: ${error.message}</p>`;
+      }
+    );
+
     countButton.addEventListener("click", async () => {
+      if (!activeCounterRef) {
+        disableCounter("Set today's buzzword in Firebase first.");
+        return;
+      }
+
       countButton.disabled = true;
       helperText.textContent = "Counting it...";
 
       try {
-        await runTransaction(counterRef, (currentValue) => {
+        await runTransaction(activeCounterRef, (currentValue) => {
           return (typeof currentValue === "number" ? currentValue : 0) + 1;
         });
       } catch (error) {
@@ -94,7 +198,9 @@ if (!hasFirebaseConfig(config)) {
 }
 
 window.addEventListener("beforeunload", () => {
-  if (typeof unsubscribe === "function") {
-    unsubscribe();
-  }
+  [unsubscribeActiveDate, unsubscribeActiveBuzzword, unsubscribeHistory].forEach((unsubscribe) => {
+    if (typeof unsubscribe === "function") {
+      unsubscribe();
+    }
+  });
 });
