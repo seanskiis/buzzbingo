@@ -37,11 +37,19 @@ body {
 }
 
 .app-logo {
+  display: inline-flex;
+  align-items: center;
   color: var(--ink);
   font-size: clamp(1.25rem, 2.6vw, 1.65rem);
   font-weight: 800;
   letter-spacing: 0;
   text-decoration: none;
+}
+
+.app-logo img {
+  display: block;
+  width: clamp(178px, 28vw, 268px);
+  height: auto;
 }
 
 .counter-shell {

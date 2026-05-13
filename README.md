@@ -93,6 +93,11 @@ Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
 
 ## Release notes
 
+### v1.2.3
+
+- Added the provided BuzzBingo header logo PNG.
+- Replaced the top-left text treatment with the logo image.
+
 ### v1.2.2
 
 - Added the BuzzBingo bee favicon.
@@ -143,6 +148,10 @@ Recommended sizes:
 - `apple-touch-icon.png`: 180x180 square PNG.
 
 After replacing icon files, bump the version query strings in `index.html` so browsers fetch the new icon.
+
+## Header logo
+
+The header uses `buzzbingo-header-logo.png`.
 
 ## Publish on GitHub Pages
 
