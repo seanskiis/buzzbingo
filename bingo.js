@@ -28,12 +28,16 @@ const appVersion = document.querySelector("#appVersion");
 const bingoCard = document.querySelector("#bingoCard");
 const bingoStatus = document.querySelector("#bingoStatus");
 const winModal = document.querySelector("#winModal");
+const winModalMessage = document.querySelector("#winModalMessage");
 const playAgainButton = document.querySelector("#playAgainButton");
 const config = window.BUZZBINGO_FIREBASE_CONFIG;
+const FALLBACK_WIN_MESSAGES = ["You won a tidbit of joy and more meetings!"];
 
 let latestRecords = {};
+let winMessages = FALLBACK_WIN_MESSAGES;
 let previouslyFocusedElement = null;
 let unsubscribeBuzzwords = null;
+let unsubscribeMessages = null;
 
 appVersion.textContent = window.BUZZBINGO_VERSION || "dev";
 
@@ -78,6 +82,25 @@ function normalizeWordRecords(records) {
       seenIds.add(word.id);
       return true;
     });
+}
+
+function normalizeWinMessages(records) {
+  const messages = Object.values(records || {})
+    .map((record) => {
+      if (typeof record === "string") {
+        return record;
+      }
+
+      return record?.message || record?.text || "";
+    })
+    .map((message) => message.trim())
+    .filter(Boolean);
+
+  return messages.length ? messages : FALLBACK_WIN_MESSAGES;
+}
+
+function getRandomWinMessage() {
+  return winMessages[Math.floor(Math.random() * winMessages.length)] || FALLBACK_WIN_MESSAGES[0];
 }
 
 function getSourceFingerprint(words) {
@@ -291,6 +314,7 @@ function showWinModal() {
   }
 
   previouslyFocusedElement = document.activeElement;
+  winModalMessage.textContent = getRandomWinMessage();
   winModal.hidden = false;
   playAgainButton.focus();
 }
@@ -374,6 +398,16 @@ if (!hasFirebaseConfig(config)) {
       (snapshot) => renderCard(snapshot.val()),
       (error) => renderEmptyCard(`Firebase read failed: ${error.message}`)
     );
+
+    unsubscribeMessages = onValue(
+      ref(database, "bingoMessages"),
+      (snapshot) => {
+        winMessages = normalizeWinMessages(snapshot.val());
+      },
+      () => {
+        winMessages = FALLBACK_WIN_MESSAGES;
+      }
+    );
   } catch (error) {
     renderEmptyCard(`Firebase setup failed: ${error.message}`);
   }
@@ -411,7 +445,9 @@ window.addEventListener("keydown", (event) => {
 });
 
 window.addEventListener("beforeunload", () => {
-  if (typeof unsubscribeBuzzwords === "function") {
-    unsubscribeBuzzwords();
-  }
+  [unsubscribeBuzzwords, unsubscribeMessages].forEach((unsubscribe) => {
+    if (typeof unsubscribe === "function") {
+      unsubscribe();
+    }
+  });
 });

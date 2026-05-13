@@ -26,6 +26,9 @@ GitHub Pages can host the page, but it cannot store a shared count by itself. Th
       "bingo": true,
       "count": 0
     }
+  },
+  "bingoMessages": {
+    "moreMeetings": "You won a tidbit of joy and more meetings!"
   }
 }
 ```
@@ -53,6 +56,10 @@ When `settings/activeDate` is `TODAY`, BuzzBingo resolves it in the browser usin
       ".write": false
     },
     "settings": {
+      ".read": true,
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() == true"
+    },
+    "bingoMessages": {
       ".read": true,
       ".write": "auth != null && root.child('admins').child(auth.uid).val() == true"
     },
@@ -101,6 +108,14 @@ dailyBuzzwords/{activeDate}/bingo
 
 Set `bingo` to `false` to exclude a word from Bingo. Missing `bingo` values are treated as included so older buzzword records still work.
 
+Bingo win messages are read from:
+
+```text
+bingoMessages
+```
+
+Each child can be a plain string. The app picks one at random every time a Bingo modal opens. If no messages exist, it uses a built-in fallback.
+
 Example:
 
 ```json
@@ -127,6 +142,10 @@ Example:
       "bingo": false,
       "count": 0
     }
+  },
+  "bingoMessages": {
+    "moreMeetings": "You won a tidbit of joy and more meetings!",
+    "calendarInvite": "A calendar invite appears. Somehow, this is your prize."
   }
 }
 ```
@@ -185,6 +204,8 @@ Open `/bingo.html` to generate a 5x5 Bingo card from `dailyBuzzwords` records wh
 
 Cards are randomized and stored in `sessionStorage`, so a visitor keeps the same word placement and marked squares for the current browser session. If there are fewer than 24 eligible buzzwords, the app repeats eligible words to fill the card.
 
+Win messages are pulled from `bingoMessages` in Firebase. Add another child string there whenever you want the modal to have more possible messages.
+
 ## Versioning
 
 BuzzBingo uses semantic versioning in `version.js`. Asset URLs in `index.html` also include the current version so browsers fetch the newest CSS and scripts after each release.
@@ -196,6 +217,12 @@ BuzzBingo uses semantic versioning in `version.js`. Asset URLs in `index.html` a
 Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
 
 ## Release notes
+
+### v2.2.0
+
+- Moved Bingo win messages into Firebase under `bingoMessages`.
+- The Bingo win modal now chooses a random message each time it opens.
+- Added Firebase setup and rules documentation for editable win messages.
 
 ### v2.1.1
 
