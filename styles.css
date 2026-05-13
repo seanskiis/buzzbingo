@@ -773,8 +773,46 @@ h1.phrase-size-xl {
   letter-spacing: 0.08em;
 }
 
+.bingo-square.is-free::after {
+  display: none;
+}
+
 .bingo-square:disabled {
   cursor: not-allowed;
+}
+
+.confetti-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -18px;
+  width: 10px;
+  height: 16px;
+  border-radius: 2px;
+  opacity: 0.95;
+  animation: confetti-fall 1.8s ease-in forwards;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translate3d(0, -20px, 0) rotate(0deg);
+  }
+
+  100% {
+    transform: translate3d(var(--confetti-drift), 110vh, 0) rotate(var(--confetti-rotation));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confetti-layer {
+    display: none;
+  }
 }
 
 @media (max-width: 520px) {

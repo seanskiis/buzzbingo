@@ -8,6 +8,21 @@ import {
 const BINGO_CARD_SIZE = 25;
 const BINGO_FREE_INDEX = 12;
 const BINGO_SESSION_KEY = "buzzbingo:bingoCard:v2";
+const BINGO_LINES = [
+  [0, 1, 2, 3, 4],
+  [5, 6, 7, 8, 9],
+  [10, 11, 12, 13, 14],
+  [15, 16, 17, 18, 19],
+  [20, 21, 22, 23, 24],
+  [0, 5, 10, 15, 20],
+  [1, 6, 11, 16, 21],
+  [2, 7, 12, 17, 22],
+  [3, 8, 13, 18, 23],
+  [4, 9, 14, 19, 24],
+  [0, 6, 12, 18, 24],
+  [4, 8, 12, 16, 20],
+];
+const CONFETTI_COLORS = ["#d44f2f", "#f0b429", "#1f8a8a", "#17212b", "#ffffff"];
 
 const appVersion = document.querySelector("#appVersion");
 const bingoCard = document.querySelector("#bingoCard");
@@ -97,6 +112,7 @@ function readStoredCard(fingerprint) {
     if (storedCard?.fingerprint === fingerprint && Array.isArray(storedCard.squares)) {
       return {
         marked: Array.isArray(storedCard.marked) ? storedCard.marked : [BINGO_FREE_INDEX],
+        celebratedLines: Array.isArray(storedCard.celebratedLines) ? storedCard.celebratedLines : [],
         squares: storedCard.squares,
       };
     }
@@ -111,11 +127,12 @@ function readStoredCard(fingerprint) {
   return null;
 }
 
-function writeStoredCard(fingerprint, squares, marked) {
+function writeStoredCard(fingerprint, squares, marked, celebratedLines = []) {
   try {
     sessionStorage.setItem(
       BINGO_SESSION_KEY,
       JSON.stringify({
+        celebratedLines,
         fingerprint,
         marked,
         squares,
@@ -133,6 +150,7 @@ function createCardState(words) {
   if (storedCard) {
     return {
       fingerprint,
+      celebratedLines: storedCard.celebratedLines,
       marked: storedCard.marked,
       squares: storedCard.squares,
     };
@@ -158,6 +176,7 @@ function createCardState(words) {
 
   return {
     fingerprint,
+    celebratedLines: [],
     marked,
     squares,
   };
@@ -169,7 +188,7 @@ function renderEmptyCard(message) {
     const isFree = index === BINGO_FREE_INDEX;
 
     return `
-      <button class="bingo-square ${isFree ? "is-free is-marked" : ""}" type="button" disabled>
+      <button class="bingo-square ${isFree ? "is-free" : ""}" type="button" disabled>
         <span>${isFree ? "FREE" : "..."}</span>
       </button>
     `;
@@ -193,10 +212,11 @@ function renderCard(records) {
     .map((square, index) => {
       const label = square?.label || "Buzzword";
       const isMarked = markedSet.has(index);
+      const showMarker = isMarked && !square?.isFree;
 
       return `
         <button
-          class="bingo-square ${square?.isFree ? "is-free" : ""} ${isMarked ? "is-marked" : ""}"
+          class="bingo-square ${square?.isFree ? "is-free" : ""} ${showMarker ? "is-marked" : ""}"
           type="button"
           data-square-index="${index}"
           aria-pressed="${isMarked ? "true" : "false"}"
@@ -206,6 +226,54 @@ function renderCard(records) {
       `;
     })
     .join("");
+}
+
+function getCompletedLineKeys(markedSet) {
+  return BINGO_LINES
+    .filter((line) => line.every((squareIndex) => markedSet.has(squareIndex)))
+    .map((line) => line.join("-"));
+}
+
+function launchConfetti() {
+  const confettiLayer = document.createElement("div");
+  confettiLayer.className = "confetti-layer";
+  confettiLayer.setAttribute("aria-hidden", "true");
+
+  for (let index = 0; index < 72; index += 1) {
+    const piece = document.createElement("span");
+    const drift = Math.random() * 220 - 110;
+    const rotation = Math.random() * 720 - 360;
+
+    piece.className = "confetti-piece";
+    piece.style.left = `${Math.random() * 100}%`;
+    piece.style.background = CONFETTI_COLORS[index % CONFETTI_COLORS.length];
+    piece.style.setProperty("--confetti-drift", `${drift}px`);
+    piece.style.setProperty("--confetti-rotation", `${rotation}deg`);
+    piece.style.animationDelay = `${Math.random() * 0.28}s`;
+    piece.style.animationDuration = `${1.4 + Math.random() * 0.9}s`;
+    confettiLayer.append(piece);
+  }
+
+  document.body.append(confettiLayer);
+  window.setTimeout(() => confettiLayer.remove(), 2600);
+}
+
+function updateBingoCelebration(storedCard, markedSet) {
+  const completedLines = getCompletedLineKeys(markedSet);
+  const celebratedSet = new Set(
+    Array.isArray(storedCard.celebratedLines) ? storedCard.celebratedLines : []
+  );
+  const newCompletedLines = completedLines.filter((lineKey) => !celebratedSet.has(lineKey));
+
+  if (newCompletedLines.length) {
+    completedLines.forEach((lineKey) => celebratedSet.add(lineKey));
+    launchConfetti();
+    bingoStatus.textContent = "BINGO. Corporate synergy has been detected.";
+  } else if (completedLines.length) {
+    bingoStatus.textContent = "BINGO is still active. Maintain unnecessary urgency.";
+  }
+
+  return [...celebratedSet].filter((lineKey) => completedLines.includes(lineKey));
 }
 
 function toggleSquare(squareButton) {
@@ -241,7 +309,8 @@ function toggleSquare(squareButton) {
 
   markedSet.add(BINGO_FREE_INDEX);
   const marked = [...markedSet].sort((left, right) => left - right);
-  writeStoredCard(storedCard.fingerprint, storedCard.squares, marked);
+  const celebratedLines = updateBingoCelebration(storedCard, markedSet);
+  writeStoredCard(storedCard.fingerprint, storedCard.squares, marked, celebratedLines);
 
   squareButton.classList.toggle("is-marked", markedSet.has(squareIndex));
   squareButton.setAttribute("aria-pressed", markedSet.has(squareIndex) ? "true" : "false");

@@ -197,6 +197,12 @@ Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
 
 ## Release notes
 
+### v2.0.1
+
+- Added Bingo detection for rows, columns, and diagonals.
+- Added a confetti celebration when a user completes a new Bingo line.
+- Kept the FREE square automatically counted without showing a daub marker on it.
+
 ### v2.0.0
 
 - Added a sticky header with links for Buzz Word of the Day and Bingo.
