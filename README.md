@@ -132,7 +132,7 @@ dailyBuzzwords/YYYY-MM-DD
 settings/activeDate = TODAY
 ```
 
-The phrase ID is generated automatically as a camelCase version of the buzzword label, and the count is saved as `0`. Saving over an existing date resets that date's count to `0`.
+The phrase ID is generated automatically as a camelCase version of the buzzword label, and the count is saved as `0`. The schedule list shows all past, current, and future buzzwords. Future dates can be edited from the admin page; today and past dates are read-only to avoid overwriting collected counts.
 
 Manual Firebase edits still work:
 
@@ -177,6 +177,13 @@ BuzzBingo uses semantic versioning in `version.js`. Asset URLs in `index.html` a
 Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
 
 ## Release notes
+
+### v1.10.0
+
+- Added a full admin schedule list for past, current, and future buzzwords.
+- Schedule rows show date, label, phrase ID, count, and status.
+- Future buzzwords can be loaded back into the form for editing.
+- Today and past buzzwords are read-only in the admin utility.
 
 ### v1.9.0
 

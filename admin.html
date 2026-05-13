@@ -8,16 +8,16 @@
       name="description"
       content="Admin utility for scheduling BuzzBingo buzzwords."
     >
-    <link rel="icon" href="favicon-16.png?v=1.9.0" type="image/png" sizes="16x16">
-    <link rel="icon" href="favicon-32.png?v=1.9.0" type="image/png" sizes="32x32">
-    <link rel="icon" href="favicon.png?v=1.9.0" type="image/png" sizes="any">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=1.9.0">
-    <link rel="stylesheet" href="styles.css?v=1.9.0">
+    <link rel="icon" href="favicon-16.png?v=1.10.0" type="image/png" sizes="16x16">
+    <link rel="icon" href="favicon-32.png?v=1.10.0" type="image/png" sizes="32x32">
+    <link rel="icon" href="favicon.png?v=1.10.0" type="image/png" sizes="any">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=1.10.0">
+    <link rel="stylesheet" href="styles.css?v=1.10.0">
   </head>
   <body class="admin-page">
     <header class="app-header" aria-label="BuzzBingo">
       <a class="app-logo" href="./" aria-label="BuzzBingo home">
-        <img src="buzzbingo-header-logo.png?v=1.9.0" alt="BuzzBingo">
+        <img src="buzzbingo-header-logo.png?v=1.10.0" alt="BuzzBingo">
       </a>
     </header>
 
@@ -68,6 +68,18 @@
 
           <p id="saveStatus" class="helper-text" aria-live="polite"></p>
         </form>
+
+        <section id="scheduleSection" class="schedule-section" hidden>
+          <div class="schedule-heading">
+            <div>
+              <p class="phrase-kicker">Schedule</p>
+              <h2>Daily Buzzwords</h2>
+            </div>
+            <p id="scheduleSummary">Loading schedule...</p>
+          </div>
+
+          <div id="scheduleList" class="schedule-list" aria-live="polite"></div>
+        </section>
       </section>
     </main>
 
@@ -81,7 +93,7 @@
     </footer>
 
     <script src="firebase-config.js"></script>
-    <script src="version.js?v=1.9.0"></script>
-    <script type="module" src="admin.js?v=1.9.0"></script>
+    <script src="version.js?v=1.10.0"></script>
+    <script type="module" src="admin.js?v=1.10.0"></script>
   </body>
 </html>

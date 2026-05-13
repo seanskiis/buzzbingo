@@ -9,6 +9,7 @@ import {
 import {
   get,
   getDatabase,
+  onValue,
   ref,
   set,
   update,
@@ -27,13 +28,18 @@ const buzzwordDate = document.querySelector("#buzzwordDate");
 const buzzwordLabel = document.querySelector("#buzzwordLabel");
 const saveButton = document.querySelector("#saveButton");
 const saveStatus = document.querySelector("#saveStatus");
+const scheduleSection = document.querySelector("#scheduleSection");
+const scheduleSummary = document.querySelector("#scheduleSummary");
+const scheduleList = document.querySelector("#scheduleList");
 
 const config = window.BUZZBINGO_FIREBASE_CONFIG;
 
 let auth = null;
 let database = null;
 let currentUser = null;
+let dailyBuzzwords = {};
 let isAdmin = false;
+let unsubscribeSchedule = null;
 
 appVersion.textContent = window.BUZZBINGO_VERSION || "dev";
 
@@ -92,6 +98,7 @@ function setAuthState(message, detail) {
 
 function setFormAvailability(enabled) {
   buzzwordForm.hidden = !enabled;
+  scheduleSection.hidden = !enabled;
   buzzwordForm.querySelectorAll("input, button").forEach((control) => {
     control.disabled = !enabled;
   });
@@ -109,6 +116,138 @@ async function checkAdminAccess(user) {
 function resetForm() {
   buzzwordDate.value = getDateKeyInTimeZone();
   buzzwordLabel.value = "";
+  saveButton.querySelector("span:last-child").textContent = "Save buzzword";
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, (character) => {
+    return {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;",
+    }[character];
+  });
+}
+
+function formatCount(value) {
+  return Number.isFinite(value) ? new Intl.NumberFormat().format(value) : "0";
+}
+
+function getScheduleStatus(dateKey, todayKey) {
+  if (dateKey > todayKey) {
+    return {
+      className: "is-future",
+      label: "Future",
+    };
+  }
+
+  if (dateKey === todayKey) {
+    return {
+      className: "is-current",
+      label: "Today",
+    };
+  }
+
+  return {
+    className: "is-locked",
+    label: "Locked",
+  };
+}
+
+function renderSchedule(records) {
+  const todayKey = getDateKeyInTimeZone();
+  const rows = Object.entries(records || {})
+    .filter(([dateKey]) => validateDateKey(dateKey))
+    .sort(([leftDate], [rightDate]) => leftDate.localeCompare(rightDate));
+
+  dailyBuzzwords = Object.fromEntries(rows);
+  scheduleSummary.textContent = rows.length
+    ? `${rows.length} scheduled ${rows.length === 1 ? "buzzword" : "buzzwords"}. Future dates can be edited.`
+    : "No buzzwords are scheduled yet.";
+
+  if (!rows.length) {
+    scheduleList.innerHTML = `
+      <article class="schedule-empty">
+        Add a dated buzzword above to start building the schedule.
+      </article>
+    `;
+    return;
+  }
+
+  scheduleList.innerHTML = rows
+    .map(([dateKey, record]) => {
+      const status = getScheduleStatus(dateKey, todayKey);
+      const label = record?.label || "Untitled buzzword";
+      const phraseId = record?.phraseId || slugify(label);
+      const count = typeof record?.count === "number" ? record.count : 0;
+      const canEdit = dateKey > todayKey;
+
+      return `
+        <article class="schedule-row ${status.className}">
+          <div>
+            <time datetime="${escapeHtml(dateKey)}">${escapeHtml(dateKey)}</time>
+            <strong>${escapeHtml(label)}</strong>
+            <span>${escapeHtml(phraseId)}</span>
+          </div>
+          <div class="schedule-meta">
+            <span class="schedule-count">${formatCount(count)}</span>
+            <span class="schedule-status">${status.label}</span>
+            ${
+              canEdit
+                ? `<button class="secondary-button schedule-edit-button" type="button" data-edit-date="${escapeHtml(dateKey)}">Edit</button>`
+                : ""
+            }
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function startScheduleListener() {
+  if (unsubscribeSchedule) {
+    unsubscribeSchedule();
+  }
+
+  scheduleSummary.textContent = "Loading schedule...";
+  scheduleList.innerHTML = "";
+  unsubscribeSchedule = onValue(
+    ref(database, "dailyBuzzwords"),
+    (snapshot) => renderSchedule(snapshot.val()),
+    (error) => {
+      scheduleSummary.textContent = `Schedule load failed: ${error.message}`;
+      scheduleList.innerHTML = "";
+    }
+  );
+}
+
+function stopScheduleListener() {
+  if (unsubscribeSchedule) {
+    unsubscribeSchedule();
+    unsubscribeSchedule = null;
+  }
+
+  dailyBuzzwords = {};
+  scheduleSummary.textContent = "Loading schedule...";
+  scheduleList.innerHTML = "";
+}
+
+function loadFutureBuzzwordForEdit(dateKey) {
+  const todayKey = getDateKeyInTimeZone();
+  const record = dailyBuzzwords[dateKey];
+
+  if (!record || dateKey <= todayKey) {
+    setSaveStatus("Only future buzzwords can be edited here.", true);
+    return;
+  }
+
+  buzzwordDate.value = dateKey;
+  buzzwordLabel.value = record.label || "";
+  saveButton.querySelector("span:last-child").textContent = "Update buzzword";
+  setSaveStatus(`Editing ${dateKey}.`);
+  buzzwordLabel.focus();
 }
 
 async function saveBuzzword(event) {
@@ -177,6 +316,16 @@ signOutButton.addEventListener("click", async () => {
   }
 });
 
+scheduleList.addEventListener("click", (event) => {
+  const editButton = event.target.closest("[data-edit-date]");
+
+  if (!editButton) {
+    return;
+  }
+
+  loadFutureBuzzwordForEdit(editButton.dataset.editDate);
+});
+
 buzzwordForm.addEventListener("submit", saveBuzzword);
 resetForm();
 setFormAvailability(false);
@@ -195,6 +344,7 @@ if (!hasFirebaseConfig(config)) {
     signOutButton.hidden = !user;
     setFormAvailability(false);
     setSaveStatus("");
+    stopScheduleListener();
 
     if (!user) {
       setAuthState("Not signed in", "Sign in with Google to check admin access.");
@@ -213,6 +363,7 @@ if (!hasFirebaseConfig(config)) {
 
       setAuthState("Admin access ready", user.email || user.uid);
       setFormAvailability(true);
+      startScheduleListener();
     } catch (error) {
       setAuthState("Admin check failed", error.message);
     }

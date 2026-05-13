@@ -477,6 +477,125 @@ h1.phrase-size-xl {
   font-weight: 800;
 }
 
+.schedule-section {
+  margin-top: 34px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+}
+
+.schedule-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.schedule-heading .phrase-kicker {
+  margin: 0 0 4px;
+}
+
+.schedule-heading h2 {
+  margin: 0;
+  font-size: clamp(1.35rem, 3vw, 1.9rem);
+  line-height: 1.1;
+}
+
+.schedule-heading p {
+  max-width: 20rem;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  text-align: right;
+}
+
+.schedule-list {
+  display: grid;
+  gap: 10px;
+}
+
+.schedule-row,
+.schedule-empty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.schedule-empty {
+  justify-content: center;
+  color: var(--muted);
+  font-weight: 700;
+  text-align: center;
+}
+
+.schedule-row time,
+.schedule-row span {
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 750;
+}
+
+.schedule-row strong {
+  display: block;
+  margin: 4px 0;
+  color: var(--ink);
+  font-size: 1.04rem;
+  line-height: 1.2;
+}
+
+.schedule-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.schedule-count,
+.schedule-status {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  border-radius: 999px;
+}
+
+.schedule-count {
+  min-width: 42px;
+  justify-content: center;
+  padding: 0 10px;
+  background: rgba(23, 33, 43, 0.08);
+  color: var(--ink) !important;
+}
+
+.schedule-status {
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  background: rgba(247, 243, 236, 0.7);
+}
+
+.schedule-row.is-future .schedule-status {
+  color: var(--teal);
+  border-color: rgba(31, 138, 138, 0.28);
+  background: rgba(31, 138, 138, 0.08);
+}
+
+.schedule-row.is-current .schedule-status {
+  color: var(--accent-dark);
+  border-color: rgba(212, 79, 47, 0.28);
+  background: rgba(212, 79, 47, 0.08);
+}
+
+.schedule-edit-button {
+  min-height: 34px;
+  padding: 0 12px;
+}
+
 @media (max-width: 520px) {
   .app-header {
     position: static;
@@ -568,5 +687,25 @@ h1.phrase-size-xl {
 
   .secondary-button {
     flex: 1;
+  }
+
+  .schedule-heading,
+  .schedule-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .schedule-heading p {
+    max-width: none;
+    text-align: left;
+  }
+
+  .schedule-meta {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .schedule-edit-button {
+    flex: 0 0 auto;
   }
 }
