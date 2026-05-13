@@ -91,6 +91,59 @@ BuzzBingo uses semantic versioning in `version.js`. Asset URLs in `index.html` a
 
 Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
 
+## Release notes
+
+### v1.2.2
+
+- Added the BuzzBingo bee favicon.
+- Generated 16x16, 32x32, and Apple touch icon PNG assets.
+- Wired the app to use the PNG favicon assets from the repo root.
+- Added release notes as a required README practice for future pushes.
+
+### v1.2.1
+
+- Made the attribution and version footer easier to see on desktop and mobile.
+- Added version query strings to app assets so browsers fetch fresh CSS and scripts.
+- Manually rebuilt GitHub Pages after the deployed site lagged behind the repo.
+
+### v1.2.0
+
+- Added footer attribution for Seanskiis and Codex.
+- Added visible app versioning.
+- Added `version.js` as the source of truth for the displayed version.
+- Documented the admin reset workflow and versioning policy.
+
+### v1.1.0
+
+- Refined the layout around the BuzzBingo brand and active buzzword phrase.
+- Moved the app name into a top-left logo treatment.
+- Changed the button label to `I HEARD IT!`.
+- Fixed title overflow for longer phrases.
+
+### v1.0.0
+
+- Created the first BuzzBingo page with a shared Firebase-backed tally.
+- Added Firebase Realtime Database configuration support.
+- Added setup documentation for GitHub Pages and Firebase rules.
+
+## App icon
+
+The page uses favicon assets from the repo root:
+
+- `favicon.png`
+- `favicon-32.png`
+- `favicon-16.png`
+- `apple-touch-icon.png`
+
+Recommended sizes:
+
+- `favicon.png`: large square PNG.
+- `favicon-32.png`: 32x32 square PNG.
+- `favicon-16.png`: 16x16 square PNG.
+- `apple-touch-icon.png`: 180x180 square PNG.
+
+After replacing icon files, bump the version query strings in `index.html` so browsers fetch the new icon.
+
 ## Publish on GitHub Pages
 
 Commit this folder and enable GitHub Pages for the repo. The published GitHub Pages URL is:
