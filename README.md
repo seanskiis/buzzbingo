@@ -142,6 +142,13 @@ Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
 
 ## Release notes
 
+### v1.5.0
+
+- Replaced the separate carousel section with a flippable main card stage.
+- Current day remains interactive with the tally button.
+- Previous daily cards are read-only and can be browsed with left/right controls.
+- Added side-card previews when adjacent daily records exist.
+
 ### v1.4.0
 
 - Replaced the archive list with a daily buzzword carousel.

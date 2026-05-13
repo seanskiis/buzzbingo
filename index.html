@@ -8,61 +8,53 @@
       name="description"
       content="A shared board for tracking corporate buzzwords in the wild."
     >
-    <link rel="icon" href="favicon-16.png?v=1.4.0" type="image/png" sizes="16x16">
-    <link rel="icon" href="favicon-32.png?v=1.4.0" type="image/png" sizes="32x32">
-    <link rel="icon" href="favicon.png?v=1.4.0" type="image/png" sizes="any">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=1.4.0">
-    <link rel="stylesheet" href="styles.css?v=1.4.0">
+    <link rel="icon" href="favicon-16.png?v=1.5.0" type="image/png" sizes="16x16">
+    <link rel="icon" href="favicon-32.png?v=1.5.0" type="image/png" sizes="32x32">
+    <link rel="icon" href="favicon.png?v=1.5.0" type="image/png" sizes="any">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=1.5.0">
+    <link rel="stylesheet" href="styles.css?v=1.5.0">
   </head>
   <body>
     <header class="app-header" aria-label="BuzzBingo">
       <a class="app-logo" href="./" aria-label="BuzzBingo home">
-        <img src="buzzbingo-header-logo.png?v=1.4.0" alt="BuzzBingo">
+        <img src="buzzbingo-header-logo.png?v=1.5.0" alt="BuzzBingo">
       </a>
     </header>
 
     <main class="counter-shell">
-      <section class="counter-panel" aria-labelledby="pageTitle">
-        <div class="label-row">
-          <span class="live-dot" aria-hidden="true"></span>
-          <span id="connectionStatus">Connecting</span>
-        </div>
+      <section class="card-stage" aria-label="Daily buzzword cards">
+        <article id="prevPreviewCard" class="preview-card preview-card-left" aria-hidden="true"></article>
+        <article id="nextPreviewCard" class="preview-card preview-card-right" aria-hidden="true"></article>
 
-        <p class="phrase-kicker">Today's buzzword is</p>
-        <h1 id="pageTitle"><span id="phraseLabel">Force Multiplier</span></h1>
-        <p class="subtitle">
-          Click the button whenever the buzzword enters the room.
-        </p>
-
-        <div class="tally-wrap" aria-live="polite">
-          <span class="tally-label">Total</span>
-          <strong id="countDisplay" class="tally">-</strong>
-        </div>
-
-        <button id="countButton" class="count-button" type="button" disabled>
-          <span class="button-icon" aria-hidden="true">+</span>
-          <span>I HEARD IT!</span>
-        </button>
-
-        <p id="helperText" class="helper-text">
-          Shared tally loads once Firebase is configured.
-        </p>
-      </section>
-
-      <section class="history-panel" aria-labelledby="historyTitle">
-        <div class="section-heading">
-          <div>
-            <p class="history-kicker">Daily cards</p>
-            <h2 id="historyTitle">Buzzword carousel</h2>
+        <section class="counter-panel" aria-labelledby="pageTitle">
+          <div class="label-row">
+            <span class="live-dot" aria-hidden="true"></span>
+            <span id="connectionStatus">Connecting</span>
           </div>
-          <div class="carousel-controls" aria-label="Carousel controls">
-            <button id="carouselPrev" class="carousel-btn" type="button" aria-label="Previous day">‹</button>
-            <button id="carouselNext" class="carousel-btn" type="button" aria-label="Next day">›</button>
+
+          <p id="cardDateLabel" class="phrase-kicker">Today's buzzword is</p>
+          <h1 id="pageTitle"><span id="phraseLabel">Force Multiplier</span></h1>
+          <p id="cardInstruction" class="subtitle">
+            Click the button whenever the buzzword enters the room.
+          </p>
+
+          <div class="tally-wrap" aria-live="polite">
+            <span class="tally-label">Total</span>
+            <strong id="countDisplay" class="tally">-</strong>
           </div>
-        </div>
-        <div id="dayCarousel" class="day-carousel" aria-live="polite" tabindex="0">
-          <p class="history-empty">Daily totals will appear here.</p>
-        </div>
+
+          <button id="countButton" class="count-button" type="button" disabled>
+            <span class="button-icon" aria-hidden="true">+</span>
+            <span>I HEARD IT!</span>
+          </button>
+
+          <p id="helperText" class="helper-text">
+            Shared tally loads once Firebase is configured.
+          </p>
+        </section>
+
+        <button id="carouselPrev" class="stage-nav stage-nav-left" type="button" aria-label="Previous day">‹</button>
+        <button id="carouselNext" class="stage-nav stage-nav-right" type="button" aria-label="Next day">›</button>
       </section>
     </main>
 
@@ -76,7 +68,7 @@
     </footer>
 
     <script src="firebase-config.js"></script>
-    <script src="version.js?v=1.4.0"></script>
-    <script type="module" src="app.js?v=1.4.0"></script>
+    <script src="version.js?v=1.5.0"></script>
+    <script type="module" src="app.js?v=1.5.0"></script>
   </body>
 </html>
