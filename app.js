@@ -203,7 +203,7 @@ function renderIntroCard() {
     </div>
 
     <p class="helper-text">
-      Swipe forward to today when someone deploys a phrase with too much confidence.
+      Swipe back to today when someone deploys a phrase with too much confidence.
     </p>
   `;
 }
@@ -293,13 +293,13 @@ function buildDayKeys(records) {
 
   const keys = Object.keys(records || {})
     .filter((dateKey) => isDateKey(dateKey) && dateKey <= targetActiveDate)
-    .sort((leftDate, rightDate) => rightDate.localeCompare(leftDate));
+    .sort((leftDate, rightDate) => leftDate.localeCompare(rightDate));
 
   if (activeDate && !keys.includes(activeDate)) {
-    keys.unshift(activeDate);
+    keys.push(activeDate);
   }
 
-  return [INTRO_CARD_KEY, ...keys];
+  return [...keys, INTRO_CARD_KEY];
 }
 
 function syncCarouselState() {
