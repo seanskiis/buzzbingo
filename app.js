@@ -235,7 +235,7 @@ function renderBuzzwordCard(dateKey, record) {
   return `
     <div class="label-row">
       <span class="live-dot" aria-hidden="true"></span>
-      <span>${isActive ? "Live tally" : "Read only"}</span>
+      <span>${isActive ? "Live tally" : "Tally closed"}</span>
     </div>
 
     <p class="phrase-kicker">${isActive ? "Current buzzword is" : formatDate(dateKey)}</p>

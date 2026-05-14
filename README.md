@@ -218,6 +218,10 @@ Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
 
 ## Release notes
 
+### v2.3.3
+
+- Renamed the past-card status label from "Read only" to "Tally closed."
+
 ### v2.3.2
 
 - Reordered the Word of the Day carousel so previous words sit to the left of the current card.
