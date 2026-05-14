@@ -206,6 +206,140 @@ Cards are randomized and stored in `sessionStorage`, so a visitor keeps the same
 
 Win messages are pulled from `bingoMessages` in Firebase. Add another child string there whenever you want the modal to have more possible messages, or use the Win Messages section in `/admin.html`.
 
+## App element glossary
+
+Use these names when writing requirements so changes stay specific and unambiguous. When a visible element is added, renamed, moved, or removed, update this glossary in the same change.
+
+### Global app elements
+
+| Element name | Meaning |
+| --- | --- |
+| App header | Sticky top white bar containing the logo and nav links. |
+| Header logo | BuzzBingo bee/logo image in the top-left. |
+| Primary nav | Top-right navigation links. |
+| Buzz Word of the Day nav link | Link to the counter/carousel page. |
+| Bingo nav link | Link to the Bingo card page. |
+| Active nav underline | Orange underline under the current page link. |
+| App footer | Bottom-left attribution area. |
+| Attribution text | "Built by Seanskiis & Codex." |
+| Version pill | Small pill showing the current app version. |
+| Favicon | Browser tab icon. |
+
+### Buzz Word of the Day page
+
+| Element name | Meaning |
+| --- | --- |
+| Card stage | Full carousel area behind and around the cards. |
+| Word carousel | Swipeable Embla carousel containing daily cards. |
+| Focused card | Center card currently selected. |
+| Past word card | Historical daily buzzword card. |
+| Current word card | Today's active tally card. |
+| Field Guide card | Informational orientation card on the right side of the carousel. |
+| Previous card button | Left arrow carousel control. |
+| Next card button | Right arrow carousel control. |
+| Status pill | Small pill at the top of a card, such as `Live tally`, `Tally closed`, `Field guide`, or `Setup needed`. |
+| Status dot | Small colored dot inside the status pill. |
+| Card kicker | Small text above the main card title. |
+| Buzzword title | Large phrase text, such as `Digital Transformation`. |
+| Card subtitle | Supporting instruction text under the buzzword title. |
+| Tally label | Text above the count, usually `TOTAL`. |
+| Tally count | Large numeric count. |
+| I HEARD IT button | Main red count button on the current word card. |
+| Button plus icon | Circle `+` inside the count button. |
+| Helper text | Small text at the bottom of a card, such as tracking date, final total, or setup instructions. |
+| Setup needed card | Error/empty state when no buzzword exists. |
+| Loading card | Initial Firebase loading state. |
+
+### Card states
+
+| Element name | Meaning |
+| --- | --- |
+| Live tally state | Current active card with the count button enabled. |
+| Tally closed state | Past card with no button and the final count shown. |
+| Field guide state | Orientation/explainer card. |
+| Setup needed state | Missing Firebase, date, or word configuration. |
+| Selected carousel state | Center card visually emphasized. |
+| Off-center carousel card | Adjacent preview card, faded and scaled. |
+
+### Bingo page
+
+| Element name | Meaning |
+| --- | --- |
+| Bingo panel | Main Bingo page content area. |
+| Bingo heading | Top heading area above the card. |
+| Bingo page kicker | "Meeting survival apparatus" text. |
+| Bingo title | Page title, currently `BuzzBingo`. |
+| Bingo status message | Text under the title, such as words loaded or Bingo detected. |
+| Bingo card | 5x5 grid. |
+| Bingo square | One cell in the Bingo grid. |
+| Free space | Center square marked `FREE`. |
+| Bingo word | Buzzword shown inside a square. |
+| Daub marker | Transparent red circle placed on a clicked square. |
+| Marked square | Square that has been clicked/daubed. |
+| Winning line | Any five marked squares in a row, column, or diagonal. |
+| Confetti animation | Celebration animation after Bingo. |
+| Win modal | Popup shown after Bingo. |
+| Win modal title | `Congratulations!` heading. |
+| Win message | Random Firebase-backed congratulations text. |
+| Play again button | Resets the card in a new order. |
+| Nah, I'm good button | Sends the user back to the Word of the Day page. |
+| Bingo helper text | "Your card order and daubs stay in this browser session." |
+
+### Admin page
+
+| Element name | Meaning |
+| --- | --- |
+| Admin panel | Main admin utility container. |
+| Admin heading | Top title/instructions area. |
+| Admin auth panel | Sign-in/status box. |
+| Auth status | Bold auth state text. |
+| Auth detail | Supporting auth/error detail. |
+| Sign in button | Google sign-in action. |
+| Sign out button | Sign-out action. |
+| Buzzword form | Form for scheduling or editing daily words. |
+| Date field | Date picker for buzzword date. |
+| Buzzword field | Text input for buzzword phrase. |
+| BINGO checkbox | Controls whether the word can appear on Bingo cards. |
+| Save buzzword button | Saves a scheduled word. |
+| Cancel edit button | Exits edit mode without saving. |
+| Save status message | Success/error text under the buzzword form. |
+| Schedule section | Admin list of all daily buzzwords. |
+| Schedule summary | Count/status text above the schedule list. |
+| Daily Buzzwords list | Full past, current, and future schedule list. |
+| Schedule row | One scheduled buzzword record. |
+| Schedule date | Date shown in a row. |
+| Schedule phrase | Buzzword label shown in a row. |
+| Schedule phrase ID | Generated camelCase ID shown in a row. |
+| Schedule count | Count attached to that date. |
+| Bingo eligibility badge | `Bingo` or `No bingo` badge. |
+| Schedule status badge | Future/current/past state badge. |
+| Edit button | Edits future scheduled words only. |
+| Celebrations section | Admin section for Bingo win messages. |
+| Win Messages list | List of saved congratulations messages. |
+| Congratulations message field | Textarea for adding win messages. |
+| Save message button | Saves a new win message. |
+| Message status | Success/error text under the message form. |
+| Message row | One saved win message. |
+| Message ID | Generated ID for a saved message. |
+| Overwrite warning modal | Confirmation popup when a date already has a word. |
+| Yes, overwrite button | Confirms replacing an existing word. |
+| Cancel overwrite button | Cancels overwrite. |
+
+### Firebase and data terms
+
+| Element name | Meaning |
+| --- | --- |
+| `dailyBuzzwords` | Firebase collection of dated buzzword records. |
+| Daily buzzword record | One date's word, count, and Bingo config. |
+| Date key | Firebase date like `2026-05-14`. |
+| `phraseId` | Generated camelCase identifier. |
+| `label` | Human-readable buzzword text. |
+| `count` | Current or final tally number. |
+| `bingo` | Boolean controlling Bingo eligibility. |
+| `bingoMessages` | Firebase collection of win modal messages. |
+| `admins` | Firebase admin allowlist by user UID. |
+| `activeDate` | Settings value; usually `TODAY`, resolved by the app. |
+
 ## Versioning
 
 BuzzBingo uses semantic versioning in `version.js`. Asset URLs in `index.html` also include the current version so browsers fetch the newest CSS and scripts after each release.
@@ -216,7 +350,19 @@ BuzzBingo uses semantic versioning in `version.js`. Asset URLs in `index.html` a
 
 Update `window.BUZZBINGO_VERSION` before committing a user-visible release.
 
+Standard release checklist:
+
+1. Update `window.BUZZBINGO_VERSION` in `version.js`.
+2. Add a matching entry under Release notes.
+3. Update the App element glossary when UI elements, labels, pages, controls, states, or Firebase terms are added or changed.
+4. Run the lightweight checks before pushing.
+
 ## Release notes
+
+### v2.3.4
+
+- Added an app element glossary to standardize requirement terminology.
+- Added glossary maintenance to the standard release checklist.
 
 ### v2.3.3
 
